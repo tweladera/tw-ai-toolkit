@@ -1,0 +1,23 @@
+{
+  "_comment": "Toolkit-level defaults. Consumer .ai/config.json values take precedence over these.",
+  "enabled_components": [
+    "skills",
+    "agents",
+    "prompts",
+    "rules",
+    "hooks",
+    "mcp_servers"
+  ],
+  "disabled_skills": [],
+  "local_overrides": true,
+  "mcp_servers": [],
+  "env_file": ".env",
+  "update_strategy": "manual",
+  "context_layer": {
+    "auto_load_l2": false,
+    "snapshot_ttl_hours": 24
+  },
+  "secrets": {
+    "provider": "env_file"
+  }
+}

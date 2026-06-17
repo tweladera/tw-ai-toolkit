@@ -1,0 +1,215 @@
+{
+  "$schema": "./config/registry.schema.json",
+  "version": "0.1.0",
+  "last_updated": "2026-06-17",
+  "toolkit_repo": "https://github.com/tw-qa/tw-ai-toolkit",
+  "components": {
+    "skills": [
+      {
+        "name": "install-toolkit",
+        "description": "Guides the user through installing tw-ai-toolkit into a consumer repository.",
+        "path": "skills/install-toolkit/skill.md",
+        "status": "stable",
+        "compatible_with": {
+          "claude_code": "full",
+          "cursor": "partial",
+          "codex": "none"
+        },
+        "invocation": "/tw-install-toolkit",
+        "version_added": "v0.1.0",
+        "parameters": [
+          {
+            "name": "repo_path",
+            "type": "string",
+            "required": "false",
+            "default": "\".\"",
+            "description": "Absolute or relative path to the consumer repo root (defaults to current directory)"
+          },
+          {
+            "name": "version",
+            "type": "string",
+            "required": "false",
+            "default": "\"latest\"",
+            "description": "Toolkit version tag to install (e.g. v1.0.0). Defaults to latest stable tag."
+          }
+        ],
+        "tags": [
+          "setup",
+          "installation",
+          "onboarding"
+        ]
+      },
+      {
+        "name": "lint-component",
+        "description": "Validates that a toolkit component follows all required conventions and schema rules.",
+        "path": "skills/lint-component/skill.md",
+        "status": "stable",
+        "compatible_with": {
+          "claude_code": "full",
+          "cursor": "partial",
+          "codex": "none"
+        },
+        "invocation": "/tw-lint-component",
+        "version_added": "v0.1.0",
+        "parameters": [
+          {
+            "name": "path",
+            "type": "string",
+            "required": "true",
+            "default": "\"\"",
+            "description": "Relative path to the component directory (e.g. skills/lint-component)"
+          }
+        ],
+        "tags": [
+          "validation",
+          "quality",
+          "maintenance"
+        ]
+      },
+      {
+        "name": "sync-context",
+        "description": "Regenerates the toolkit registry and context snapshots from current component files.",
+        "path": "skills/sync-context/skill.md",
+        "status": "stable",
+        "compatible_with": {
+          "claude_code": "full",
+          "cursor": "partial",
+          "codex": "none"
+        },
+        "invocation": "/tw-sync-context",
+        "version_added": "v0.1.0",
+        "parameters": [
+          {
+            "name": "force",
+            "type": "boolean",
+            "required": "false",
+            "default": "\"false\"",
+            "description": "Force regeneration even if no component files appear to have changed"
+          }
+        ],
+        "tags": [
+          "context",
+          "maintenance",
+          "registry"
+        ]
+      }
+    ],
+    "agents": [
+      {
+        "name": "onboard-repo",
+        "description": "Analyzes a repository and sets up tw-ai-toolkit with configuration tailored to the project.",
+        "path": "agents/onboard-repo/agent.md",
+        "status": "stable",
+        "compatible_with": {
+          "claude_code": "full",
+          "cursor": "partial",
+          "codex": "none"
+        },
+        "invocation": "/tw-onboard-repo",
+        "version_added": "v0.1.0",
+        "tags": [
+          "onboarding",
+          "setup",
+          "initialization"
+        ]
+      },
+      {
+        "name": "scaffold-component",
+        "description": "Creates a new toolkit component from the appropriate template given a type and name.",
+        "path": "agents/scaffold-component/agent.md",
+        "status": "stable",
+        "compatible_with": {
+          "claude_code": "full",
+          "cursor": "partial",
+          "codex": "none"
+        },
+        "invocation": "/tw-scaffold-component",
+        "version_added": "v0.1.0",
+        "tags": [
+          "scaffolding",
+          "development",
+          "maintenance"
+        ]
+      }
+    ],
+    "prompts": [],
+    "rules": [
+      {
+        "name": "claude-base",
+        "description": "Base behavioral rules for Claude Code when working in a repo that uses tw-ai-toolkit.",
+        "path": "rules/claude-base/rule.md",
+        "status": "stable",
+        "compatible_with": {
+          "claude_code": "full",
+          "cursor": "none",
+          "codex": "none"
+        },
+        "version_added": "v0.1.0",
+        "tags": [
+          "claude-code",
+          "base",
+          "context-loading"
+        ]
+      },
+      {
+        "name": "cursor-base",
+        "description": "Base behavioral rules for Cursor when working in a repo that uses tw-ai-toolkit.",
+        "path": "rules/cursor-base/rule.md",
+        "status": "stable",
+        "compatible_with": {
+          "claude_code": "full",
+          "cursor": "none",
+          "codex": "none"
+        },
+        "version_added": "v0.1.0",
+        "tags": [
+          "cursor",
+          "base",
+          "context-loading"
+        ]
+      }
+    ],
+    "hooks": [],
+    "mcp_servers": [
+      {
+        "name": "tw-github",
+        "description": "GitHub MCP server exposing PR, issue, and repository tools to AI assistants.",
+        "path": "mcp/tw-github/server.md",
+        "status": "stable",
+        "compatible_with": {
+          "claude_code": "full",
+          "cursor": "full",
+          "codex": "none"
+        },
+        "version_added": "v0.1.0",
+        "tags": [
+          "github",
+          "vcs",
+          "prs",
+          "issues",
+          "enterprise"
+        ]
+      },
+      {
+        "name": "tw-jira",
+        "description": "Jira MCP server exposing issue, sprint, and project tools to AI assistants.",
+        "path": "mcp/tw-jira/server.md",
+        "status": "stable",
+        "compatible_with": {
+          "claude_code": "full",
+          "cursor": "full",
+          "codex": "none"
+        },
+        "version_added": "v0.1.0",
+        "tags": [
+          "jira",
+          "project-management",
+          "issues",
+          "sprints",
+          "enterprise"
+        ]
+      }
+    ]
+  },
+  "git_hash": "ff712b5"
+}

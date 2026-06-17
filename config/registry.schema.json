@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tw-ai-toolkit/registry.schema.json",
+  "title": "tw-ai-toolkit Component Registry",
+  "description": "Schema for registry.json — the machine-readable index of all toolkit components",
+  "type": "object",
+  "required": ["version", "last_updated", "components"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Toolkit version this registry corresponds to"
+    },
+    "last_updated": {
+      "type": "string",
+      "description": "ISO date of last registry sync"
+    },
+    "toolkit_repo": {
+      "type": "string",
+      "description": "URL of the toolkit repository"
+    },
+    "components": {
+      "type": "object",
+      "properties": {
+        "skills":      { "type": "array", "items": { "$ref": "#/$defs/component" } },
+        "agents":      { "type": "array", "items": { "$ref": "#/$defs/component" } },
+        "prompts":     { "type": "array", "items": { "$ref": "#/$defs/component" } },
+        "rules":       { "type": "array", "items": { "$ref": "#/$defs/component" } },
+        "hooks":       { "type": "array", "items": { "$ref": "#/$defs/component" } },
+        "mcp_servers": { "type": "array", "items": { "$ref": "#/$defs/component" } }
+      }
+    }
+  },
+  "$defs": {
+    "component": {
+      "type": "object",
+      "required": ["name", "description", "path", "status", "compatible_with"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Component name without tw- prefix. Example: sync-context"
+        },
+        "invocation": {
+          "type": "string",
+          "description": "How to invoke this component. Example: /tw-sync-context"
+        },
+        "description": {
+          "type": "string",
+          "description": "One-sentence description of what this component does"
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to the component definition file relative to repo root"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["stable", "experimental", "deprecated"],
+          "description": "Lifecycle status of the component"
+        },
+        "deprecated_since": {
+          "type": "string",
+          "description": "Version when this component was deprecated. Only set if status=deprecated"
+        },
+        "removed_in": {
+          "type": "string",
+          "description": "Major version when this component will be removed. Only set if status=deprecated"
+        },
+        "replacement": {
+          "type": "string",
+          "description": "Name of the replacement component. Only set if status=deprecated"
+        },
+        "version_added": {
+          "type": "string",
+          "description": "Toolkit version when this component was introduced"
+        },
+        "compatible_with": {
+          "type": "object",
+          "required": ["claude_code"],
+          "properties": {
+            "claude_code": { "type": "string", "enum": ["full", "partial", "none"] },
+            "cursor":      { "type": "string", "enum": ["full", "partial", "none"] },
+            "codex":       { "type": "string", "enum": ["full", "partial", "none"] }
+          }
+        },
+        "parameters": {
+          "type": "array",
+          "description": "Parameters accepted by this component",
+          "items": {
+            "type": "object",
+            "required": ["name", "required"],
+            "properties": {
+              "name":        { "type": "string" },
+              "type":        { "type": "string" },
+              "required":    { "type": "boolean" },
+              "default":     {},
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "description": "Searchable tags for this component",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

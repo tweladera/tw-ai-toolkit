@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tw-ai-toolkit/config.schema.json",
+  "title": "tw-ai-toolkit Consumer Configuration",
+  "description": "Schema for .ai/config.json in consumer repositories",
+  "type": "object",
+  "required": ["toolkit_version"],
+  "properties": {
+    "toolkit_version": {
+      "type": "string",
+      "description": "Pinned version of tw-ai-toolkit (semver tag). Example: v1.0.0",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "enabled_components": {
+      "type": "array",
+      "description": "Component types to enable. Omit to enable all.",
+      "items": {
+        "type": "string",
+        "enum": ["skills", "agents", "prompts", "rules", "hooks", "mcp_servers"]
+      },
+      "default": ["skills", "agents", "prompts", "rules", "hooks", "mcp_servers"]
+    },
+    "disabled_skills": {
+      "type": "array",
+      "description": "List of skill names to disable in this repo (without tw- prefix).",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "local_overrides": {
+      "type": "boolean",
+      "description": "Whether to allow local .ai/skills/, .ai/agents/, etc. overrides.",
+      "default": true
+    },
+    "mcp_servers": {
+      "type": "array",
+      "description": "MCP servers to activate for this repo.",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "MCP server name as defined in mcp/<name>/server.md"
+          },
+          "config": {
+            "type": "object",
+            "description": "Server-specific configuration overrides"
+          }
+        }
+      },
+      "default": []
+    },
+    "env_file": {
+      "type": "string",
+      "description": "Path to the .env file relative to consumer repo root.",
+      "default": ".env"
+    },
+    "update_strategy": {
+      "type": "string",
+      "description": "How the toolkit is updated in this repo.",
+      "enum": ["manual", "dependabot"],
+      "default": "manual"
+    },
+    "context_layer": {
+      "type": "object",
+      "description": "Context Layer System configuration.",
+      "properties": {
+        "auto_load_l2": {
+          "type": "boolean",
+          "description": "Whether the assistant should auto-load registry.json at session start.",
+          "default": false
+        },
+        "snapshot_ttl_hours": {
+          "type": "integer",
+          "description": "How old (in hours) a snapshot can be before the assistant should warn about staleness.",
+          "default": 24
+        }
+      }
+    },
+    "secrets": {
+      "type": "object",
+      "description": "Secrets provider configuration. Controls how the toolkit loads credentials.",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["env_file", "aws_secrets_manager", "vault", "gcp_secret_manager", "azure_key_vault"],
+          "description": "Where to load secrets from. Defaults to env_file (.env).",
+          "default": "env_file"
+        },
+        "aws": {
+          "type": "object",
+          "description": "AWS Secrets Manager configuration. Used when provider=aws_secrets_manager.",
+          "properties": {
+            "region":      { "type": "string", "description": "AWS region (e.g. us-east-1)" },
+            "secret_name": { "type": "string", "description": "Secret name or ARN in Secrets Manager" },
+            "prefix":      { "type": "string", "description": "Optional key prefix within the secret JSON" }
+          }
+        },
+        "vault": {
+          "type": "object",
+          "description": "HashiCorp Vault configuration. Used when provider=vault.",
+          "properties": {
+            "addr":       { "type": "string", "description": "Vault server address (e.g. https://vault.company.com)" },
+            "path":       { "type": "string", "description": "KV path to the secret (e.g. secret/tw-ai-toolkit)" },
+            "auth_method":{ "type": "string", "enum": ["token", "approle", "aws_iam"], "default": "token" }
+          }
+        },
+        "gcp": {
+          "type": "object",
+          "description": "GCP Secret Manager configuration. Used when provider=gcp_secret_manager.",
+          "properties": {
+            "project_id":  { "type": "string", "description": "GCP project ID" },
+            "secret_name": { "type": "string", "description": "Secret resource name" }
+          }
+        },
+        "azure": {
+          "type": "object",
+          "description": "Azure Key Vault configuration. Used when provider=azure_key_vault.",
+          "properties": {
+            "vault_url":   { "type": "string", "description": "Key Vault URL (e.g. https://myvault.vault.azure.net)" },
+            "secret_name": { "type": "string", "description": "Secret name in the vault" }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

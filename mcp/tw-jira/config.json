@@ -1,0 +1,48 @@
+{
+  "$schema": "../../config/mcp-server.schema.json",
+  "server_name": "tw-jira",
+  "package": "@sooperset/mcp-atlassian",
+  "package_manager": "npx",
+  "env_prefix": "TW_JIRA",
+  "required_env": [
+    {
+      "var": "TW_JIRA_HOST",
+      "maps_to": "JIRA_URL",
+      "description": "Jira instance URL (e.g. https://your-org.atlassian.net)"
+    },
+    {
+      "var": "TW_JIRA_EMAIL",
+      "maps_to": "JIRA_USERNAME",
+      "description": "Atlassian account email address"
+    },
+    {
+      "var": "TW_JIRA_API_TOKEN",
+      "maps_to": "JIRA_API_TOKEN",
+      "description": "Jira API token from id.atlassian.com"
+    }
+  ],
+  "optional_env": [],
+  "options": {
+    "default_project": {
+      "type": "string",
+      "description": "Default Jira project key when not specified in tool calls",
+      "default": ""
+    }
+  },
+  "tools": [
+    "jira_get_issue",
+    "jira_search_issues",
+    "jira_create_issue",
+    "jira_update_issue",
+    "jira_transition_issue",
+    "jira_add_comment",
+    "jira_list_comments",
+    "jira_get_project",
+    "jira_list_projects",
+    "jira_get_sprint",
+    "jira_list_sprints",
+    "jira_get_board",
+    "jira_log_work",
+    "jira_get_current_user"
+  ]
+}

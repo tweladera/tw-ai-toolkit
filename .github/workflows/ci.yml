@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate Components
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false   # toolkit is the root repo, not a consumer
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Make scripts executable
+        run: chmod +x scripts/*.sh scripts/git-hooks/*
+
+      - name: Run validation
+        run: bash scripts/validate.sh --strict
+
+      - name: Check registry is committed
+        # Fails if registry.json or context snapshots have uncommitted changes
+        # after validation (which reruns the sync). This catches PRs that forgot
+        # to commit updated snapshots.
+        run: |
+          git diff --exit-code registry.json || {
+            echo "::error::registry.json has uncommitted changes."
+            echo "Run 'bash scripts/sync-registry.sh' and commit the result."
+            exit 1
+          }
+          git diff --exit-code context/ || {
+            echo "::error::context/ snapshots have uncommitted changes."
+            echo "Run 'bash scripts/sync-snapshots.sh' and commit the result."
+            exit 1
+          }

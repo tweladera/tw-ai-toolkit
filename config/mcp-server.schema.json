@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tw-ai-toolkit/mcp-server.schema.json",
+  "title": "tw-ai-toolkit MCP Server Config",
+  "description": "Schema for mcp/<server-name>/config.json files",
+  "type": "object",
+  "required": ["server_name", "package", "package_manager", "env_prefix", "required_env", "tools"],
+  "properties": {
+    "server_name": {
+      "type": "string",
+      "description": "Server name matching the folder name (e.g. tw-github)"
+    },
+    "package": {
+      "type": "string",
+      "description": "npm package that provides the MCP server"
+    },
+    "package_manager": {
+      "type": "string",
+      "enum": ["npx", "node", "python", "uvx"],
+      "description": "How to invoke the package"
+    },
+    "env_prefix": {
+      "type": "string",
+      "description": "Prefix for env vars in .env (e.g. TW_GITHUB)"
+    },
+    "required_env": {
+      "type": "array",
+      "description": "Required environment variables",
+      "items": {
+        "type": "object",
+        "required": ["var", "maps_to", "description"],
+        "properties": {
+          "var":         { "type": "string", "description": "Env var name in .env (TW_* convention)" },
+          "maps_to":     { "type": "string", "description": "Env var name expected by the server package" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "optional_env": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["var", "maps_to", "description"],
+        "properties": {
+          "var":         { "type": "string" },
+          "maps_to":     { "type": "string" },
+          "default":     { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "options": {
+      "type": "object",
+      "description": "Optional server configuration exposed in .ai/config.json mcp_servers[].config"
+    },
+    "tools": {
+      "type": "array",
+      "description": "List of tool names this server exposes",
+      "items": { "type": "string" }
+    }
+  }
+}
