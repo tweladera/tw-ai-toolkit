@@ -97,7 +97,7 @@ if [[ "$ARG_VERSION" == "latest" ]]; then
     RESOLVED_VERSION=$(GIT_TERMINAL_PROMPT=0 git ls-remote --tags "$TOOLKIT_REPO" 2>/dev/null \
         | grep -oE 'refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$' \
         | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' \
-        | sort -V | tail -1)
+        | sort -V | tail -1 || true)
 
     if [[ -z "$RESOLVED_VERSION" ]]; then
         warn "Could not resolve latest tag — falling back to 'main'."
