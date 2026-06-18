@@ -124,7 +124,7 @@ echo ""
 info "Adding git submodule..."
 cd "$REPO_PATH"
 
-git submodule add "$TOOLKIT_REPO" "$SUBMODULE_PATH" 2>/dev/null \
+git submodule add "$TOOLKIT_REPO" "$SUBMODULE_PATH" \
     || abort "Failed to add submodule. Check git output above."
 
 (cd "$SUBMODULE_PATH" && git checkout "$RESOLVED_VERSION" --quiet) \
