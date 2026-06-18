@@ -7,10 +7,10 @@ AI models should check this file before relying on L2/L3 snapshots.
 
 | Field | Value |
 |---|---|
-| **Last sync** | 2026-06-18 00:33 UTC |
-| **Git hash at sync** | `50835956` |
+| **Last sync** | 2026-06-18 14:29 UTC |
+| **Git hash at sync** | `fba91ccd` |
 | **Toolkit version** | 0.1.0 |
-| **Components indexed** | 9 |
+| **Components indexed** | 10 |
 | **Snapshot files** | `context/snapshot.md`, `context/snapshots/` |
 
 ## How to Check Freshness
@@ -20,7 +20,7 @@ Run in the toolkit repo root:
 git rev-parse --short HEAD
 ```
 
-If the result does not match `50835956`, snapshots are stale. Regenerate:
+If the result does not match `fba91ccd`, snapshots are stale. Regenerate:
 ```bash
 bash scripts/sync-registry.sh && bash scripts/sync-snapshots.sh
 ```

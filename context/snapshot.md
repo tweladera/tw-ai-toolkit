@@ -1,6 +1,6 @@
 # Toolkit Snapshot (L2)
 
-> Auto-generated on 2026-06-18 00:33 UTC. Do not edit manually.
+> Auto-generated on 2026-06-18 14:29 UTC. Do not edit manually.
 > Check `context/CHECKPOINT.md` for freshness info before relying on this data.
 
 ---
@@ -9,7 +9,7 @@
 
 | Type | Total | Stable | Deprecated | Experimental |
 |---|---|---|---|---|
-| Skills | 3 | 3 | 0 | 0 |
+| Skills | 4 | 4 | 0 | 0 |
 | Agents | 2 | 2 | 0 | 0 |
 | Prompts | 0 | 0 | 0 | 0 |
 | Rules | 2 | 2 | 0 | 0 |
@@ -24,6 +24,7 @@
 |---|---|---|---|---|---|---|
 | install-toolkit | `/tw-install-toolkit` | Guides the user through installing tw-ai-toolkit into a consumer repository. | stable | yes | partial | no |
 | lint-component | `/tw-lint-component` | Validates that a toolkit component follows all required conventions and schema rules. | stable | yes | partial | no |
+| python-test-governor | `/tw-python-test-governor` | Audits Python unit test coverage, maps production modules to tests, classifies gaps by severity, and generates a structured governance report with actionable remediation decisions. | stable | yes | partial | no |
 | sync-context | `/tw-sync-context` | Regenerates the toolkit registry and context snapshots from current component files. | stable | yes | partial | no |
 
 ## Agents
