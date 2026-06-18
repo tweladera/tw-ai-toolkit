@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # install.sh
-# Installs tw-ai-toolkit as a git submodule in a consumer repository.
+# Installs tw-ai-toolkit in a consumer repository.
 #
 # Usage:
 #   bash install.sh [OPTIONS]
@@ -9,7 +9,9 @@
 #   --version  <tag>   Toolkit version to install (default: latest stable tag)
 #   --repo-path <dir>  Consumer repo root (default: current directory)
 #   --no-claude-md     Skip CLAUDE.md update
-#   --dependabot       Configure Dependabot for automated update PRs
+#   --dependabot       Configure Dependabot for automated update PRs (submodule mode only)
+#   --local-only       Clone toolkit without git submodule — files are gitignored locally,
+#                      nothing is committed. Ideal for personal/local-only usage.
 #   --yes              Non-interactive: accept all defaults without prompting
 
 set -euo pipefail
@@ -26,6 +28,7 @@ ARG_VERSION="latest"
 ARG_REPO_PATH="."
 ARG_NO_CLAUDE_MD=false
 ARG_DEPENDABOT=false
+ARG_LOCAL_ONLY=false
 ARG_YES=false
 
 # ── Argument parsing ──────────────────────────────────────────────────────────
@@ -36,6 +39,7 @@ while [[ $# -gt 0 ]]; do
         --repo-path)    ARG_REPO_PATH="$2";  shift 2 ;;
         --no-claude-md) ARG_NO_CLAUDE_MD=true; shift ;;
         --dependabot)   ARG_DEPENDABOT=true; shift ;;
+        --local-only)   ARG_LOCAL_ONLY=true; shift ;;
         --yes)          ARG_YES=true;        shift ;;
         *) echo "Unknown option: $1" >&2; echo "Run with --help for usage." >&2; exit 1 ;;
     esac
@@ -119,19 +123,27 @@ echo ""
 ask "Proceed with installation?" "y" || { info "Installation cancelled."; exit 0; }
 echo ""
 
-# ── Install submodule ─────────────────────────────────────────────────────────
+# ── Install toolkit ───────────────────────────────────────────────────────────
 
-info "Adding git submodule..."
 cd "$REPO_PATH"
 
-git submodule add --force "$TOOLKIT_REPO" "$SUBMODULE_PATH" \
-    || abort "Failed to add submodule. Check git output above."
+if $ARG_LOCAL_ONLY; then
+    info "Cloning toolkit (local-only, not tracked by git)..."
+    mkdir -p "$AI_DIR"
+    git clone --quiet --branch "$RESOLVED_VERSION" --depth 1 "$TOOLKIT_REPO" "$SUBMODULE_PATH" 2>&1 \
+        || abort "Failed to clone toolkit. Check output above."
+    success "Toolkit cloned and pinned to $RESOLVED_VERSION (local-only)"
+else
+    info "Adding git submodule..."
+    git submodule add --force "$TOOLKIT_REPO" "$SUBMODULE_PATH" \
+        || abort "Failed to add submodule. Check git output above."
 
-(cd "$SUBMODULE_PATH" && git checkout "$RESOLVED_VERSION" --quiet) \
-    || abort "Version '$RESOLVED_VERSION' not found in toolkit repo."
+    (cd "$SUBMODULE_PATH" && git checkout "$RESOLVED_VERSION" --quiet) \
+        || abort "Version '$RESOLVED_VERSION' not found in toolkit repo."
 
-git add ".gitmodules" "$SUBMODULE_PATH"
-success "Submodule added and pinned to $RESOLVED_VERSION"
+    git add ".gitmodules" "$SUBMODULE_PATH"
+    success "Submodule added and pinned to $RESOLVED_VERSION"
+fi
 
 # ── Create .ai/ structure ─────────────────────────────────────────────────────
 
@@ -222,9 +234,9 @@ if [[ ! -f ".env.toolkit.example" ]]; then
     success "Created .env.toolkit.example (copy to .env and fill credentials)"
 fi
 
-# ── Dependabot (optional) ──────────────────────────────────────────────────────
+# ── Dependabot (optional, submodule mode only) ────────────────────────────────
 
-if $ARG_DEPENDABOT || ask "Configure Dependabot for automated update PRs? (optional)" "n"; then
+if ! $ARG_LOCAL_ONLY && { $ARG_DEPENDABOT || ask "Configure Dependabot for automated update PRs? (optional)" "n"; }; then
     mkdir -p ".github"
     DEPENDABOT_FILE=".github/dependabot.yml"
 
@@ -254,6 +266,21 @@ updates:
 EOF
         success "Created $DEPENDABOT_FILE"
     fi
+fi
+
+# ── Local gitignore (local-only mode) ─────────────────────────────────────────
+
+if $ARG_LOCAL_ONLY; then
+    EXCLUDE_FILE="$REPO_PATH/.git/info/exclude"
+    mkdir -p "$(dirname "$EXCLUDE_FILE")"
+    # Add entries only if not already present
+    add_exclude() {
+        grep -qxF "$1" "$EXCLUDE_FILE" 2>/dev/null || echo "$1" >> "$EXCLUDE_FILE"
+    }
+    add_exclude ".ai/"
+    add_exclude "CLAUDE.md"
+    add_exclude ".env.toolkit.example"
+    success "Added toolkit files to .git/info/exclude (locally gitignored, never committed)"
 fi
 
 # ── Validate ──────────────────────────────────────────────────────────────────
@@ -288,6 +315,11 @@ echo "    $AI_DIR/AGENTS.md"
 echo ""
 echo "  Next steps:"
 echo "    1. Fill in .env with any needed credentials (see .env.toolkit.example)"
+if $ARG_LOCAL_ONLY; then
+echo "    2. Open Claude Code — toolkit is ready. Nothing to commit."
+echo "    3. To update later: cd $SUBMODULE_PATH && git pull origin main"
+else
 echo "    2. git add .ai/ CLAUDE.md && git commit -m \"chore: add tw-ai-toolkit $RESOLVED_VERSION\""
 echo "    3. Open Claude Code and ask: \"What toolkit components are available?\""
+fi
 echo ""
