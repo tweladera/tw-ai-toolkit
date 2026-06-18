@@ -56,9 +56,9 @@ ask() {
         [[ "$default" == "y" ]] && return 0 || return 1
     fi
     local answer
-    read -r -p "  $prompt [${default^^}/$([ "$default" == "y" ] && echo n || echo Y)] " answer
+    read -r -p "  $prompt [$(echo "$default" | tr '[:lower:]' '[:upper:]')/$([ "$default" == "y" ] && echo N || echo Y)] " answer
     answer="${answer:-$default}"
-    [[ "${answer,,}" == "y" ]]
+    [[ "$(echo "$answer" | tr '[:upper:]' '[:lower:]')" == "y" ]]
 }
 
 # ── Prerequisites ─────────────────────────────────────────────────────────────
