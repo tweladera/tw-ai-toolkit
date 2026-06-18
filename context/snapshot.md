@@ -1,6 +1,6 @@
 # Toolkit Snapshot (L2)
 
-> Auto-generated on 2026-06-18 14:31 UTC. Do not edit manually.
+> Auto-generated on 2026-06-18 15:37 UTC. Do not edit manually.
 > Check `context/CHECKPOINT.md` for freshness info before relying on this data.
 
 ---
@@ -9,7 +9,7 @@
 
 | Type | Total | Stable | Deprecated | Experimental |
 |---|---|---|---|---|
-| Skills | 5 | 5 | 0 | 0 |
+| Skills | 8 | 8 | 0 | 0 |
 | Agents | 2 | 2 | 0 | 0 |
 | Prompts | 0 | 0 | 0 | 0 |
 | Rules | 2 | 2 | 0 | 0 |
@@ -27,6 +27,9 @@
 | python-test-governor | `/tw-python-test-governor` | Audits Python unit test coverage, maps production modules to tests, classifies gaps by severity, and generates a structured governance report with actionable remediation decisions. | stable | yes | partial | no |
 | python-test-remediator | `/tw-python-test-remediator` | Consumes a Python test governance report, assigns coverage tiers per module, then generates or updates maintainable pytest and unittest tests to meet tiered line-coverage targets. | stable | yes | partial | no |
 | sync-context | `/tw-sync-context` | Regenerates the toolkit registry and context snapshots from current component files. | stable | yes | partial | no |
+| ts-architecture-analyzer | `/tw-ts-architecture-analyzer` | Analyzes TypeScript/NestJS code with adaptive depth, auto-detects granularity level (L1-L4), identifies architectural risks, silent traps, and scalability issues, and produces a technical health scorecard with Gherkin feature file. | stable | yes | partial | no |
+| ts-test-governor | `/tw-ts-test-governor` | Audits Jest unit test coverage in a TypeScript/NestJS repository, maps production modules to spec files, classifies gaps by severity, and generates a structured governance report with actionable remediation decisions. | stable | yes | partial | no |
+| ts-test-remediator | `/tw-ts-test-remediator` | Consumes a TypeScript/NestJS test governance report, assigns Istanbul coverage tiers per module, then generates or updates maintainable Jest spec files to meet tiered line-coverage targets. | stable | yes | partial | no |
 
 ## Agents
 
