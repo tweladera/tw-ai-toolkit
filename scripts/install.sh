@@ -16,7 +16,7 @@ set -euo pipefail
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
-TOOLKIT_REPO="https://github.com/tw-qa/tw-ai-toolkit.git"
+TOOLKIT_REPO="https://github.com/tweladera/tw-ai-toolkit.git"
 AI_DIR=".ai"
 SUBMODULE_PATH="$AI_DIR/toolkit"
 
