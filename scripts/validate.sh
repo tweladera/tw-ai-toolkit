@@ -64,6 +64,9 @@ errors = []
 warnings = []
 checked = 0
 
+# GitHub Actions (and most CI systems) set CI=true automatically
+IN_CI = os.environ.get("CI", "").lower() in ("true", "1", "yes")
+
 def err(path, msg):
     errors.append(f"  ERROR   {path}: {msg}")
 
@@ -121,29 +124,35 @@ def _parse_yaml(text):
 # ── Check 1: Registry sync ────────────────────────────────────────────────────
 
 print("  Syncing registry...", end=" ", flush=True)
-try:
-    result = subprocess.run(
-        ["bash", "scripts/sync-registry.sh"],
-        cwd=TOOLKIT_ROOT, capture_output=True, text=True
-    )
-    if result.returncode != 0:
-        errors.append("  ERROR   registry: sync-registry.sh failed\n" + result.stderr)
-        print("FAIL")
-    else:
-        # Check for drift
-        diff = subprocess.run(
-            ["git", "diff", "--name-only", "registry.json"],
+# In CI the workflow already runs git diff --exit-code registry.json after this
+# step, so we skip the in-process sync+drift check to avoid false positives from
+# last_updated changing on every run.
+if IN_CI:
+    print("SKIP (CI)")
+else:
+    try:
+        result = subprocess.run(
+            ["bash", "scripts/sync-registry.sh"],
             cwd=TOOLKIT_ROOT, capture_output=True, text=True
         )
-        if diff.stdout.strip():
-            errors.append("  ERROR   registry: registry.json is out of sync with component files. "
-                          "Commit the result of sync-registry.sh.")
-            print("DRIFT")
+        if result.returncode != 0:
+            errors.append("  ERROR   registry: sync-registry.sh failed\n" + result.stderr)
+            print("FAIL")
         else:
-            print("OK")
-except Exception as e:
-    errors.append(f"  ERROR   registry: {e}")
-    print("FAIL")
+            # Check for drift
+            diff = subprocess.run(
+                ["git", "diff", "--name-only", "registry.json"],
+                cwd=TOOLKIT_ROOT, capture_output=True, text=True
+            )
+            if diff.stdout.strip():
+                errors.append("  ERROR   registry: registry.json is out of sync with component files. "
+                              "Commit the result of sync-registry.sh.")
+                print("DRIFT")
+            else:
+                print("OK")
+    except Exception as e:
+        errors.append(f"  ERROR   registry: {e}")
+        print("FAIL")
 
 # ── Load registry ─────────────────────────────────────────────────────────────
 
@@ -300,7 +309,9 @@ else:
 print("  Snapshot freshness...", end=" ", flush=True)
 checkpoint_path = os.path.join(TOOLKIT_ROOT, "context", "CHECKPOINT.md")
 
-if not os.path.exists(checkpoint_path):
+if IN_CI:
+    print("SKIP (CI)")
+elif not os.path.exists(checkpoint_path):
     warn("context/CHECKPOINT.md", "not found — run sync-snapshots.sh")
     print("WARN")
 else:

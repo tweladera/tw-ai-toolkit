@@ -7,8 +7,8 @@ AI models should check this file before relying on L2/L3 snapshots.
 
 | Field | Value |
 |---|---|
-| **Last sync** | 2026-06-17 23:52 UTC |
-| **Git hash at sync** | `ff712b5d` |
+| **Last sync** | 2026-06-18 00:33 UTC |
+| **Git hash at sync** | `50835956` |
 | **Toolkit version** | 0.1.0 |
 | **Components indexed** | 9 |
 | **Snapshot files** | `context/snapshot.md`, `context/snapshots/` |
@@ -20,7 +20,7 @@ Run in the toolkit repo root:
 git rev-parse --short HEAD
 ```
 
-If the result does not match `ff712b5d`, snapshots are stale. Regenerate:
+If the result does not match `50835956`, snapshots are stale. Regenerate:
 ```bash
 bash scripts/sync-registry.sh && bash scripts/sync-snapshots.sh
 ```

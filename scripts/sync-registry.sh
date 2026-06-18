@@ -11,7 +11,7 @@ cd "$TOOLKIT_ROOT"
 echo "[tw-ai-toolkit] Syncing registry..."
 
 python3 - "$TOOLKIT_ROOT" << 'PYTHON'
-import sys, os, re, json, subprocess
+import sys, os, re, json
 from datetime import date
 
 TOOLKIT_ROOT = sys.argv[1]
@@ -170,15 +170,6 @@ with open(registry_path) as f:
 
 registry['components'] = scan_components()
 registry['last_updated'] = str(date.today())
-
-try:
-    git_hash = subprocess.check_output(
-        ['git', 'rev-parse', '--short', 'HEAD'],
-        cwd=TOOLKIT_ROOT, stderr=subprocess.DEVNULL
-    ).decode().strip()
-    registry['git_hash'] = git_hash
-except Exception:
-    pass
 
 with open(registry_path, 'w') as f:
     json.dump(registry, f, indent=2)
