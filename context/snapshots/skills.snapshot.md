@@ -1,6 +1,6 @@
 # Skills Snapshot (L3)
 
-> Auto-generated on 2026-06-18 14:29 UTC. Do not edit manually.
+> Auto-generated on 2026-06-18 14:31 UTC. Do not edit manually.
 > For a quick overview of all types, load `context/snapshot.md` (L2).
 
 ---
@@ -71,6 +71,29 @@
 **Added in:** v0.1.0
 
 **Definition file:** `skills/python-test-governor/skill.md`
+
+---
+
+## python-test-remediator
+
+**Description:** Consumes a Python test governance report, assigns coverage tiers per module, then generates or updates maintainable pytest and unittest tests to meet tiered line-coverage targets.
+
+**Invocation:** `/tw-python-test-remediator`
+
+**Compatibility:** Claude Code: `full` | Cursor: `partial` | Codex: `none`
+
+**Parameters:**
+
+| Name | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `report_file` | string | false | "" | Path to the governance report file produced by /tw-python-test-governor. If omitted, Claude will look for the most recent TEST_GOVERNANCE_REPORT_*.md in the project root. |
+| `base_ref` | string | false | "" | Git ref used by /tw-python-test-governor (e.g. origin/main). Passed to the inventory script to regenerate the report when no report file is provided. |
+
+**Tags:** `python`, `testing`, `coverage`, `qa`, `remediation`
+
+**Added in:** v0.1.0
+
+**Definition file:** `skills/python-test-remediator/skill.md`
 
 ---
 

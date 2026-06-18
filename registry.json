@@ -110,6 +110,42 @@
         ]
       },
       {
+        "name": "python-test-remediator",
+        "description": "Consumes a Python test governance report, assigns coverage tiers per module, then generates or updates maintainable pytest and unittest tests to meet tiered line-coverage targets.",
+        "path": "skills/python-test-remediator/skill.md",
+        "status": "stable",
+        "compatible_with": {
+          "claude_code": "full",
+          "cursor": "partial",
+          "codex": "none"
+        },
+        "invocation": "/tw-python-test-remediator",
+        "version_added": "v0.1.0",
+        "parameters": [
+          {
+            "name": "report_file",
+            "type": "string",
+            "required": "false",
+            "default": "\"\"",
+            "description": "Path to the governance report file produced by /tw-python-test-governor. If omitted, Claude will look for the most recent TEST_GOVERNANCE_REPORT_*.md in the project root."
+          },
+          {
+            "name": "base_ref",
+            "type": "string",
+            "required": "false",
+            "default": "\"\"",
+            "description": "Git ref used by /tw-python-test-governor (e.g. origin/main). Passed to the inventory script to regenerate the report when no report file is provided."
+          }
+        ],
+        "tags": [
+          "python",
+          "testing",
+          "coverage",
+          "qa",
+          "remediation"
+        ]
+      },
+      {
         "name": "sync-context",
         "description": "Regenerates the toolkit registry and context snapshots from current component files.",
         "path": "skills/sync-context/skill.md",
