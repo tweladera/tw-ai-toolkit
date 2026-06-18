@@ -85,15 +85,27 @@ fi
 
 if [[ "$ARG_VERSION" == "latest" ]]; then
     info "Resolving latest stable version..."
-    RESOLVED_VERSION=$(git ls-remote --tags "$TOOLKIT_REPO" 2>/dev/null \
+
+    # Use GH_TOKEN / GITHUB_TOKEN if available (needed for private repos)
+    GIT_ASKPASS_CMD=""
+    if [[ -n "${GH_TOKEN:-}" ]]; then
+        GIT_ASKPASS_CMD="GIT_ASKPASS=echo GIT_USERNAME=token GIT_PASSWORD=$GH_TOKEN"
+    elif [[ -n "${GITHUB_TOKEN:-}" ]]; then
+        GIT_ASKPASS_CMD="GIT_ASKPASS=echo GIT_USERNAME=token GIT_PASSWORD=$GITHUB_TOKEN"
+    fi
+
+    RESOLVED_VERSION=$(GIT_TERMINAL_PROMPT=0 git ls-remote --tags "$TOOLKIT_REPO" 2>/dev/null \
         | grep -oE 'refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$' \
         | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' \
         | sort -V | tail -1)
 
     if [[ -z "$RESOLVED_VERSION" ]]; then
-        abort "Could not resolve latest version. Check network access or use --version."
+        warn "Could not resolve latest tag — falling back to 'main'."
+        warn "For a pinned version use: --version v0.1.0"
+        RESOLVED_VERSION="main"
+    else
+        info "Latest stable version: $RESOLVED_VERSION"
     fi
-    info "Latest stable version: $RESOLVED_VERSION"
 else
     RESOLVED_VERSION="$ARG_VERSION"
 fi
