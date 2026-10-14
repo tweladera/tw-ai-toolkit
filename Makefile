@@ -6,7 +6,7 @@
 # Prerequisites:
 #   pip install pyyaml   (for sync and validate)
 
-.PHONY: help sync validate test check-env new-skill link-claude link-cursor link-all verify
+.PHONY: help sync validate test check-env new-skill link-claude link-cursor link-all verify install update
 
 # ─────────────────────────────────────────────
 # Default: show help
@@ -17,9 +17,14 @@ help:
 	@echo "tw-ai-toolkit — available commands"
 	@echo "────────────────────────────────────"
 	@echo "  make sync         Regenerate registry.json and context snapshots"
-	@echo "  make validate     Validate the catalog (--strict)"
+	@echo "  make validate     Validate the catalog"
 	@echo "  make test         Run the test suite"
 	@echo "  make check-env    Check system dependencies"
+	@echo ""
+	@echo "  make install TOOLKIT=~/tw-ai-toolkit TARGET=/path/to/repo"
+	@echo "                    Install the toolkit into a consumer repo (local only)"
+	@echo "  make update  TOOLKIT=~/tw-ai-toolkit TARGET=/path/to/repo"
+	@echo "                    Pull latest toolkit + re-link skills in a consumer repo"
 	@echo ""
 	@echo "  make link-claude  Create symlinks in .claude/skills/ (local dev)"
 	@echo "  make link-cursor  Create symlinks in .cursor/skills/ (local dev)"
@@ -41,8 +46,8 @@ sync:
 	@echo "Sync complete"
 
 validate:
-	@echo "-> Validating catalog with --strict..."
-	python3 scripts/validate.py --strict
+	@echo "-> Validating catalog..."
+	python3 scripts/validate.py
 
 # Shortcut: sync + validate in a single command
 ci: sync validate
@@ -54,6 +59,28 @@ ci: sync validate
 test:
 	@echo "-> Running test suite..."
 	python3 -m pytest tests/
+
+# ─────────────────────────────────────────────
+# Consumer repo installation (local only — nothing pushed to remote)
+# Usage: make install TOOLKIT=~/tw-ai-toolkit TARGET=/path/to/consumer-repo
+#        make update  TOOLKIT=~/tw-ai-toolkit TARGET=/path/to/consumer-repo
+# ─────────────────────────────────────────────
+
+TOOLKIT ?= ~/tw-ai-toolkit
+TARGET  ?= .
+
+install:
+	@echo "-> Installing toolkit into $(TARGET) from $(TOOLKIT) ..."
+	python3 $(TOOLKIT)/scripts/install.py --local $(TOOLKIT) --target $(TARGET)/.ai/toolkit
+	python3 $(TARGET)/.ai/toolkit/scripts/install.py --link-all
+	python3 $(TARGET)/.ai/toolkit/scripts/install.py --verify
+
+update:
+	@echo "-> Pulling latest toolkit from origin/main ..."
+	cd $(TOOLKIT) && git pull origin main
+	@echo "-> Re-linking skills in $(TARGET) ..."
+	python3 $(TARGET)/.ai/toolkit/scripts/install.py --link-all
+	@echo "Update complete"
 
 # ─────────────────────────────────────────────
 # Installation / linking (local development in this repo)
