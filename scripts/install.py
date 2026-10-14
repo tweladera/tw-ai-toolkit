@@ -16,15 +16,17 @@ Usage:
     # Step 3 — verify the installation
     python3 install.py --verify
 
-Typical flow for a new consumer repo (using submodule):
+Recommended flow — local install (nothing pushed to remote):
+    git clone https://github.com/tweladera/tw-ai-toolkit.git ~/tw-ai-toolkit
     cd /path/to/your-repo
-    git submodule add https://github.com/tw-qa/tw-ai-toolkit.git .ai/toolkit
+    python3 ~/tw-ai-toolkit/scripts/install.py --local ~/tw-ai-toolkit
     python3 .ai/toolkit/scripts/install.py --link-all
     python3 .ai/toolkit/scripts/install.py --verify
 
-Local development / testing (symlink to a local clone):
+Git submodule (only when team wants toolkit pinned in the repo):
     cd /path/to/your-repo
-    python3 /path/to/tw-ai-toolkit/scripts/install.py --local /path/to/tw-ai-toolkit
+    git submodule add https://github.com/tweladera/tw-ai-toolkit.git .ai/toolkit
+    python3 .ai/toolkit/scripts/install.py
     python3 .ai/toolkit/scripts/install.py --link-all
 """
 from __future__ import annotations
@@ -36,7 +38,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-TOOLKIT_REPO_HTTPS = "https://github.com/tw-qa/tw-ai-toolkit.git"
+TOOLKIT_REPO_HTTPS = "https://github.com/tweladera/tw-ai-toolkit.git"
 DEFAULT_TARGET = ".ai/toolkit"
 GITIGNORE_COMMENT = "# tw-ai-toolkit (managed by install.py — do not commit)"
 

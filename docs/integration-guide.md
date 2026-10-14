@@ -7,31 +7,33 @@ the toolkit from a consumer repository.
 
 ## Installation
 
-### Method A — Install script (recommended)
+The toolkit installs **locally only** — nothing is committed or pushed to the consumer repo.
+All generated files (`.ai/`, `.claude/skills/`, `.cursor/skills/`, `CLAUDE.md`) are added
+to `.gitignore` automatically.
+
+### Method A — Local install (recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/tw-qa/tw-ai-toolkit/main/scripts/install.sh | bash
+# Step 1 — clone the toolkit once anywhere on your machine
+git clone https://github.com/tweladera/tw-ai-toolkit.git ~/tw-ai-toolkit
+
+# Step 2 — run from your project root
+python3 ~/tw-ai-toolkit/scripts/install.py --local ~/tw-ai-toolkit
+python3 .ai/toolkit/scripts/install.py --link-all
+python3 .ai/toolkit/scripts/install.py --verify
 ```
 
-The script is interactive and will ask:
-- Which components to include (all, or specific types)
-- Whether to add a `CLAUDE.md` fragment
-- Whether to add a `.cursorrules` fragment (Cursor users)
-- Whether to configure Dependabot for automated update PRs (optional)
+### Method B — Git submodule (only when the full team pins the toolkit via the repo)
 
-### Method B — Manual git submodule
+> This commits a `.gitmodules` reference to the remote. Only use when every team member
+> should share the same toolkit version through the repository.
 
 ```bash
-# Add the toolkit as a submodule
-git submodule add https://github.com/tw-qa/tw-ai-toolkit.git .ai/toolkit
-
-# Pin to a specific version (recommended)
-cd .ai/toolkit && git checkout v1.0.0 && cd ../..
-git add .gitmodules .ai/toolkit
-git commit -m "chore: add tw-ai-toolkit v1.0.0"
+git submodule add https://github.com/tweladera/tw-ai-toolkit.git .ai/toolkit
+python3 .ai/toolkit/scripts/install.py
+python3 .ai/toolkit/scripts/install.py --link-all
+python3 .ai/toolkit/scripts/install.py --verify
 ```
-
-Then create the `.ai/` structure manually (see section below).
 
 ---
 

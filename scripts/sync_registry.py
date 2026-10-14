@@ -24,7 +24,7 @@ except ImportError:
     sys.exit(1)
 
 
-TOOLKIT_REPO = "https://github.com/tw-qa/tw-ai-toolkit.git"
+TOOLKIT_REPO = "https://github.com/tweladera/tw-ai-toolkit.git"
 
 # Maps directory name → (definition filename, registry key)
 COMPONENT_TYPES: dict[str, tuple[str, str]] = {

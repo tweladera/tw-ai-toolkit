@@ -29,9 +29,10 @@ invocation: tw-install-toolkit
 
 ## Description
 
-Walks the user through installing tw-ai-toolkit as a git submodule in a consumer repo.
-Creates the `.ai/` folder structure, sets up `config.json`, generates a `CLAUDE.md`
-fragment, and optionally configures Dependabot. Validates the installation at the end.
+Walks the user through installing tw-ai-toolkit locally in a consumer repo.
+The toolkit is installed via `--local` symlink — nothing is committed or pushed to the
+consumer repo's remote. Creates the `.ai/` folder structure, sets up `AGENTS.md` and
+`CLAUDE.md`, links all skills, and validates the installation at the end.
 
 ## When to Use
 
@@ -51,99 +52,56 @@ fragment, and optionally configures Dependabot. Validates the installation at th
    - `git` is available in the terminal
    - The `repo_path` is a git repository (`.git/` directory exists)
    - The toolkit is not already installed (`.ai/toolkit/` does not exist)
+   - The toolkit is cloned somewhere on the machine (ask the user for the path, default `~/tw-ai-toolkit`)
    If any check fails, report the issue clearly and stop.
 
-2. **Resolve the version.** If `version` is `latest`, run:
+2. **Clone the toolkit if not present.** If the toolkit path does not exist:
    ```bash
-   git ls-remote --tags https://github.com/tw-qa/tw-ai-toolkit.git | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -1
+   git clone https://github.com/tweladera/tw-ai-toolkit.git ~/tw-ai-toolkit
    ```
-   Show the resolved version to the user and ask for confirmation before proceeding.
 
-3. **Add the submodule:**
+3. **Install the toolkit locally** (nothing committed to the consumer repo):
    ```bash
    cd <repo_path>
-   git submodule add https://github.com/tw-qa/tw-ai-toolkit.git .ai/toolkit
-   cd .ai/toolkit && git checkout <version> && cd ../..
-   git add .gitmodules .ai/toolkit
+   python3 ~/tw-ai-toolkit/scripts/install.py --local ~/tw-ai-toolkit
    ```
+   This creates `.ai/toolkit/` as a symlink, generates `.ai/AGENTS.md`, `.ai/config.json`,
+   and `CLAUDE.md`, and adds all of them to `.gitignore`.
 
-4. **Create `.ai/config.json`** with these defaults:
-   ```json
-   {
-     "toolkit_version": "<version>",
-     "enabled_components": ["skills", "agents", "prompts", "rules", "hooks", "mcp_servers"],
-     "disabled_skills": [],
-     "local_overrides": true,
-     "mcp_servers": [],
-     "env_file": ".env",
-     "update_strategy": "manual"
-   }
-   ```
-
-5. **Create `.ai/AGENTS.md`** with this content:
-   ```markdown
-   # AI Toolkit Context
-
-   This repo uses tw-ai-toolkit <version>.
-
-   Load toolkit context from:
-   - Toolkit overview: `.ai/toolkit/AGENTS.md`
-   - Available components: `.ai/toolkit/registry.json`
-   - Local overrides: `.ai/skills/`, `.ai/agents/`
-   - Local config: `.ai/config.json`
-
-   All toolkit skills and agents use the `/tw-` prefix.
-   ```
-
-6. **Check if `CLAUDE.md` exists** in the repo root:
-   - If it exists: append the following block to it (with a separator comment)
-   - If it does not exist: create it with the following content
-
-   ```markdown
-   ## AI Toolkit (tw-ai-toolkit)
-
-   This repo uses tw-ai-toolkit. On every session start:
-   1. Read `.ai/AGENTS.md` for toolkit context
-   2. Check `.ai/toolkit/context/CHECKPOINT.md` — if the git hash is stale, run `/tw-sync-context`
-   3. Toolkit skills and agents use the `/tw-` prefix
-
-   To see all available components: load `.ai/toolkit/registry.json`
-   ```
-
-7. **Copy the env example:**
+4. **Link all skills:**
    ```bash
-   cp .ai/toolkit/config/.env.example .env.toolkit.example
+   python3 .ai/toolkit/scripts/install.py --link-all
    ```
-   Tell the user: "Copy `.env.toolkit.example` to `.env` and fill in any credentials you need."
+   This creates symlinks in `.claude/skills/`, `.cursor/skills/`, `.claude/rules/`, and
+   `.cursor/rules/`. All added to `.gitignore` automatically.
 
-8. **Ask the user** if they want to configure Dependabot for automated update PRs.
-   If yes, append to `.github/dependabot.yml` (create the file if needed):
-   ```yaml
-   - package-ecosystem: gitsubmodules
-     directory: "/"
-     schedule:
-       interval: weekly
-     labels:
-       - dependencies
-       - ai-toolkit
+5. **Copy the env example:**
+   ```bash
+   cp .ai/toolkit/.env.example .env
+   ```
+   Tell the user: "Edit `.env` and fill in the credentials for the MCP integrations you need.
+   Never commit `.env` — it is already in `.gitignore`."
+
+6. **Validate the installation:**
+   ```bash
+   python3 .ai/toolkit/scripts/install.py --verify
    ```
 
-9. **Validate the installation** by checking these files exist:
+7. **Validate the installation** by checking these files exist:
    - `.ai/toolkit/AGENTS.md`
    - `.ai/toolkit/registry.json`
-   - `.ai/config.json`
    - `.ai/AGENTS.md`
+   - `CLAUDE.md`
 
-10. **Report success:**
+8. **Report success:**
     ```
-    tw-ai-toolkit <version> installed successfully.
+    tw-ai-toolkit installed successfully (local-only — nothing pushed to remote).
 
-    Files created:
-    - .ai/toolkit/          (submodule — pinned to <version>)
-    - .ai/config.json
+    Files created (all gitignored):
+    - .ai/toolkit/          (symlink to ~/tw-ai-toolkit)
     - .ai/AGENTS.md
     - CLAUDE.md             (updated)
-    - .env.toolkit.example  (copy to .env and fill credentials)
+    - .env                  (fill in your MCP credentials)
 
     Next steps:
     1. Fill in .env with any needed credentials

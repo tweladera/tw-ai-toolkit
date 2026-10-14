@@ -1,7 +1,7 @@
 {
   "version": "0.5.0",
-  "last_updated": "2026-10-14T16:47:21Z",
-  "toolkit_repo": "https://github.com/tw-qa/tw-ai-toolkit.git",
+  "last_updated": "2026-10-14T20:42:54Z",
+  "toolkit_repo": "https://github.com/tweladera/tw-ai-toolkit.git",
   "components": {
     "skills": [
       {

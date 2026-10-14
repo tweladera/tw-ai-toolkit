@@ -66,20 +66,20 @@ test:
 #        make update  TOOLKIT=~/tw-ai-toolkit TARGET=/path/to/consumer-repo
 # ─────────────────────────────────────────────
 
-TOOLKIT ?= ~/tw-ai-toolkit
-TARGET  ?= .
+TOOLKIT ?= $(HOME)/tw-ai-toolkit
+TARGET  ?= $(error TARGET is required. Usage: make install TARGET=/path/to/consumer-repo)
 
 install:
 	@echo "-> Installing toolkit into $(TARGET) from $(TOOLKIT) ..."
-	python3 $(TOOLKIT)/scripts/install.py --local $(TOOLKIT) --target $(TARGET)/.ai/toolkit
-	python3 $(TARGET)/.ai/toolkit/scripts/install.py --link-all
-	python3 $(TARGET)/.ai/toolkit/scripts/install.py --verify
+	cd $(TARGET) && python3 $(TOOLKIT)/scripts/install.py --local $(TOOLKIT)
+	cd $(TARGET) && python3 .ai/toolkit/scripts/install.py --link-all
+	cd $(TARGET) && python3 .ai/toolkit/scripts/install.py --verify
 
 update:
 	@echo "-> Pulling latest toolkit from origin/main ..."
 	cd $(TOOLKIT) && git pull origin main
 	@echo "-> Re-linking skills in $(TARGET) ..."
-	python3 $(TARGET)/.ai/toolkit/scripts/install.py --link-all
+	cd $(TARGET) && python3 .ai/toolkit/scripts/install.py --link-all
 	@echo "Update complete"
 
 # ─────────────────────────────────────────────

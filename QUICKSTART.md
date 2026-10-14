@@ -21,7 +21,7 @@ automating the full quality loop from spec generation to coverage to contract te
 
 - Git installed
 - Claude Code (recommended) or Cursor
-- Access to the toolkit repository (`https://github.com/tw-qa/tw-ai-toolkit`)
+- Access to the toolkit repository (`https://github.com/tweladera/tw-ai-toolkit`)
 
 ---
 
@@ -354,7 +354,7 @@ your-repo/
 
 | Goal | Command |
 |---|---|
-| Install the toolkit | `bash /path/to/tw-ai-toolkit/scripts/install.sh --local-only` |
+| Install the toolkit | `python3 ~/tw-ai-toolkit/scripts/install.py --local ~/tw-ai-toolkit` |
 | List available components | Ask the AI: "What toolkit components are available?" |
 | **Day 1 engagement setup** | `/tw-client-bootstrap` |
 | Day 1 health report only | `/tw-stack-health-check` |
@@ -388,5 +388,5 @@ your-repo/
 | Onboard a new repo | `/tw-onboard-repo` in Claude Code |
 | Sync context | `/tw-sync-context` in Claude Code |
 | Validate a component | `/tw-lint-component <path>` in Claude Code |
-| Update the toolkit | `cd .ai/toolkit && git pull origin main` |
+| Update the toolkit | `cd ~/tw-ai-toolkit && git pull origin main && python3 .ai/toolkit/scripts/install.py --link-all` |
 | Uninstall | `rm -rf .ai/ CLAUDE.md .env.toolkit.example` |
