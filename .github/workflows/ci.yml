@@ -35,14 +35,15 @@ jobs:
         run: python3 scripts/validate.py
 
       - name: Check registry is committed
-        # Fails if registry.json or context snapshots have uncommitted changes
-        # after sync. This catches PRs that forgot to commit updated snapshots.
+        # Fails if registry.json or context snapshots have uncommitted structural
+        # changes after sync. Ignores last_updated timestamp (always regenerated).
         run: |
-          git diff --exit-code registry.json || {
-            echo "::error::registry.json has uncommitted changes."
+          REGISTRY_DRIFT=$(git diff registry.json | grep '^[+-]' | grep -v '^---\|^+++\|last_updated' || true)
+          if [ -n "$REGISTRY_DRIFT" ]; then
+            echo "::error::registry.json has uncommitted structural changes."
             echo "Run 'make sync' and commit the result."
             exit 1
-          }
+          fi
           git diff --exit-code context/ || {
             echo "::error::context/ snapshots have uncommitted changes."
             echo "Run 'make sync' and commit the result."
