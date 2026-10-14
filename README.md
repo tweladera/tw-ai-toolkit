@@ -14,10 +14,12 @@ and automating the full quality loop from spec to coverage to contract testing.
 
 ## Quick Start
 
-**Use the toolkit in your repo:**
+**Use the toolkit in your repo (local only — nothing pushed to remote):**
 ```bash
-git submodule add https://github.com/tw-qa/tw-ai-toolkit.git .ai/toolkit
+git clone https://github.com/tweladera/tw-ai-toolkit.git ~/tw-ai-toolkit
+python3 ~/tw-ai-toolkit/scripts/install.py --local ~/tw-ai-toolkit
 python3 .ai/toolkit/scripts/install.py --link-all
+python3 .ai/toolkit/scripts/install.py --verify
 ```
 
 **Understand the toolkit (AI assistants):**

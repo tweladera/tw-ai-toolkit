@@ -32,21 +32,32 @@ a growing library of battle-tested components.
 
 ### Step 1 — Install
 
-**Option A1 — Submodule (recommended for teams)**
+**Option A1 — Local install (recommended — nothing pushed to remote)**
 
 ```bash
+# Clone the toolkit once anywhere on your machine
+git clone https://github.com/tweladera/tw-ai-toolkit.git ~/tw-ai-toolkit
+
+# Run from your project root
 cd /path/to/your-repo
-git submodule add https://github.com/tw-qa/tw-ai-toolkit.git .ai/toolkit
+python3 ~/tw-ai-toolkit/scripts/install.py --local ~/tw-ai-toolkit
 python3 .ai/toolkit/scripts/install.py --link-all
 python3 .ai/toolkit/scripts/install.py --verify
 ```
 
-**Option A2 — Local symlink (dev/test — no cloning needed)**
+Everything gets added to `.gitignore` automatically — your remote repo stays clean.
+
+**Option A2 — Git submodule (only if the team wants the toolkit pinned in the repo)**
+
+> This commits a `.gitmodules` reference to the remote. Only use when the whole team
+> should share the same toolkit version via the repository.
 
 ```bash
 cd /path/to/your-repo
-python3 /path/to/tw-ai-toolkit/scripts/install.py --local /path/to/tw-ai-toolkit
+git submodule add https://github.com/tweladera/tw-ai-toolkit.git .ai/toolkit
+python3 .ai/toolkit/scripts/install.py
 python3 .ai/toolkit/scripts/install.py --link-all
+python3 .ai/toolkit/scripts/install.py --verify
 ```
 
 The `--link-all` step creates symlinks in `.claude/skills/`, `.cursor/skills/`,
@@ -106,15 +117,18 @@ Browse `registry.json` or ask your assistant what skills are available.
 
 ### Updating the toolkit
 
+**If installed with `--local` (recommended):**
+```bash
+cd ~/tw-ai-toolkit && git pull origin main
+# Re-link in case new skills were added
+cd /path/to/your-repo && python3 .ai/toolkit/scripts/install.py --link-all
+```
+
+**If installed as a submodule:**
 ```bash
 cd /path/to/your-repo
 git submodule update --remote .ai/toolkit
 python3 .ai/toolkit/scripts/install.py --link-all
-```
-
-Or use the built-in update script with version selection:
-```bash
-bash .ai/toolkit/scripts/update.sh
 ```
 
 ---

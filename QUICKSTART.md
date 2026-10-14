@@ -27,26 +27,37 @@ automating the full quality loop from spec generation to coverage to contract te
 
 ## Installation
 
-### Option A — From a local clone (recommended)
+### Option A — Local install (recommended — nothing pushed to remote)
 
 ```bash
-bash /path/to/tw-ai-toolkit/scripts/install.sh --local-only
+# Step 1 — clone the toolkit once anywhere on your machine
+git clone https://github.com/tweladera/tw-ai-toolkit.git ~/tw-ai-toolkit
+
+# Step 2 — run from your project root
+python3 ~/tw-ai-toolkit/scripts/install.py --local ~/tw-ai-toolkit
+python3 .ai/toolkit/scripts/install.py --link-all
+python3 .ai/toolkit/scripts/install.py --verify
 ```
 
-### Option B — From GitHub (remote)
+### Option B — Git submodule (when the team wants the toolkit pinned in the repo)
+
+> Note: this commits a `.gitmodules` reference to your remote repo.
+> Only use this if the whole team should share the same toolkit version via the repo.
 
 ```bash
-curl -fsSL "https://raw.githubusercontent.com/tw-qa/tw-ai-toolkit/main/scripts/install.sh" \
-  -o /tmp/tw-install.sh && bash /tmp/tw-install.sh --local-only
+git submodule add https://github.com/tweladera/tw-ai-toolkit.git .ai/toolkit
+python3 .ai/toolkit/scripts/install.py
+python3 .ai/toolkit/scripts/install.py --link-all
+python3 .ai/toolkit/scripts/install.py --verify
 ```
 
 ### What the installer does
 
-1. Clones the toolkit into `.ai/toolkit/` inside your repo
+1. Creates `.ai/AGENTS.md` — toolkit context loaded by Claude Code on every session
 2. Creates `.ai/config.json` with the local configuration
-3. Creates `.ai/AGENTS.md` with the toolkit context for the AI
-4. Creates `CLAUDE.md` at the root with context-loading instructions for Claude Code
-5. Adds all of these to `.git/info/exclude` — **never committed, never pushed to GitHub**
+3. Creates `CLAUDE.md` at the root with context-loading instructions for Claude Code
+4. Creates symlinks in `.claude/skills/` and `.cursor/skills/` for all toolkit skills
+5. Adds `.ai/toolkit/`, `.claude/skills/`, `.cursor/skills/` to `.gitignore` — **never committed, never pushed**
 
 ---
 
