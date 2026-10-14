@@ -1,152 +1,295 @@
 # tw-ai-toolkit — Quickstart
 
-Guía para instalar, configurar y usar el toolkit en cualquier repo de desarrollo.
+Guide to install, configure, and use the toolkit in any development repository.
 
 ---
 
-## ¿Qué es tw-ai-toolkit?
+## What is tw-ai-toolkit?
 
-Un conjunto centralizado de skills, agents, rules y MCP servers que amplían las capacidades
-de tu asistente AI (Claude Code, Cursor) dentro de tus proyectos. El toolkit vive en su
-propio repositorio y se instala localmente en cada repo donde quieras usarlo — sin formar
-parte de tu código.
+A centralized collection of skills, agents, rules, and MCP servers that extend the capabilities
+of your AI assistant (Claude Code, Cursor) inside your projects. The toolkit lives in its own
+repository and is installed locally in each repo where you want to use it — without becoming
+part of your source code.
 
----
-
-## Prerequisitos
-
-- Git instalado
-- Claude Code (recomendado) o Cursor
-- Acceso al repo del toolkit (actualmente en `https://github.com/tweladera/tw-ai-toolkit`)
+Built with a **QA / SDET-first perspective**: the toolkit amplifies the quality engineer's
+view that developers often miss — surfacing blind spots, enforcing spec-first thinking, and
+automating the full quality loop from spec generation to coverage to contract testing.
 
 ---
 
-## Instalación
+## Prerequisites
 
-### Opción A — Desde GitHub (remoto)
+- Git installed
+- Claude Code (recommended) or Cursor
+- Access to the toolkit repository (`https://github.com/tw-qa/tw-ai-toolkit`)
 
-Párate en la raíz del repo donde quieres usar el toolkit y ejecuta:
+---
+
+## Installation
+
+### Option A — From a local clone (recommended)
 
 ```bash
-curl -fsSL "https://raw.githubusercontent.com/tweladera/tw-ai-toolkit/main/scripts/install.sh" \
+bash /path/to/tw-ai-toolkit/scripts/install.sh --local-only
+```
+
+### Option B — From GitHub (remote)
+
+```bash
+curl -fsSL "https://raw.githubusercontent.com/tw-qa/tw-ai-toolkit/main/scripts/install.sh" \
   -o /tmp/tw-install.sh && bash /tmp/tw-install.sh --local-only
 ```
 
-### Opción B — Desde copia local (recomendada si tienes el repo clonado)
+### What the installer does
 
-```bash
-bash /ruta/a/tw-ai-toolkit/scripts/install.sh --local-only
-```
-
-Ejemplo real:
-```bash
-bash /Users/evansladera/workspace-tw/tw-qa/tw-ai-toolkit/scripts/install.sh --local-only
-```
-
-### ¿Qué hace la instalación?
-
-1. Clona el toolkit en `.ai/toolkit/` dentro de tu repo
-2. Crea `.ai/config.json` con la configuración local
-3. Crea `.ai/AGENTS.md` con el contexto del toolkit para el AI
-4. Crea `CLAUDE.md` en la raíz con las instrucciones de carga para Claude Code
-5. Agrega todos estos archivos a `.git/info/exclude` — **nunca se commitean, nunca van a GitHub**
+1. Clones the toolkit into `.ai/toolkit/` inside your repo
+2. Creates `.ai/config.json` with the local configuration
+3. Creates `.ai/AGENTS.md` with the toolkit context for the AI
+4. Creates `CLAUDE.md` at the root with context-loading instructions for Claude Code
+5. Adds all of these to `.git/info/exclude` — **never committed, never pushed to GitHub**
 
 ---
 
-## Verificar la instalación
+## Verify the installation
 
-Después de instalar, abre Claude Code en ese repo y escribe:
+After installing, open Claude Code in that repo and type:
 
 ```
-¿Qué componentes del toolkit están disponibles?
+What toolkit components are available?
 ```
 
-Claude Code leerá automáticamente el `CLAUDE.md` y cargará el contexto del toolkit.
+Claude Code will automatically read `CLAUDE.md` and load the toolkit context.
 
 ---
 
-## Componentes disponibles
+## Available Components (v0.5.0)
 
-### Skills — Herramientas atómicas (invocación: `/tw-<nombre>`)
+### Skills — Atomic tools (invocation: `/tw-<name>`)
 
-Los skills son acciones puntuales que le pides al AI que ejecute.
+Skills are single-purpose actions you ask the AI to execute.
 
-| Skill | Invocación | Para qué usarlo | Cuándo usarlo |
+#### Consulting & Assessment Skills
+
+| Skill | Invocation | What it does | When to use |
 |---|---|---|---|
-| **sync-context** | `/tw-sync-context` | Regenera el registry y los snapshots de contexto del toolkit | Después de modificar o agregar componentes al toolkit |
-| **lint-component** | `/tw-lint-component <path>` | Valida que un componente sigue el schema y las convenciones del toolkit | Antes de hacer commit de un componente nuevo o modificado |
-| **install-toolkit** | `/tw-install-toolkit` | Guía la instalación del toolkit en un repo consumidor desde el AI | Cuando quieres instalar el toolkit sin salir de Claude Code |
+| **stack-health-check** | `/tw-stack-health-check` | Day 1 technical assessment. Auto-detects stack, CI, cloud, coverage, dependency CVEs, and debt signals. Produces an executive summary (≤2 pages) + full technical report | First thing on any new engagement — before touching any code |
+| **test-strategy-generator** | `/tw-test-strategy-generator` | Generates a complete QA Strategy document: test pyramid with ratios, tooling per layer, CI gate definitions, 4-phase implementation roadmap, RACI | First deliverable for any client — defines the quality plan before work starts |
+| **living-docs** | `/tw-living-docs` | Reads `.feature` files + CI test results (JUnit XML / Playwright JSON) and produces pass/fail/pending living documentation in Markdown, HTML, or Confluence wiki markup | After each main branch build to keep docs in sync with passing behavior |
 
-**Ejemplos de uso:**
+#### Spec-First & Behavioral Skills
 
-```
-/tw-sync-context
-/tw-lint-component skills/mi-nuevo-skill
-```
+| Skill | Invocation | What it does | When to use |
+|---|---|---|---|
+| **exec-spec-generator** | `/tw-exec-spec-generator` | Generates executable Gherkin specs from user stories. Applies 6 QA lenses and produces a Blind Spots Report with scenarios the developer didn't think of | Before writing any implementation code for a new feature |
+| **golden-master** | `/tw-golden-master` | Captures behavioral snapshots (`mode=capture`) and compares future runs against them (`mode=compare`) to detect regressions or prove equivalence | Before/after any refactor or legacy migration |
+
+#### Unit Test Skills
+
+| Skill | Invocation | What it does | When to use |
+|---|---|---|---|
+| **ts-architecture-analyzer** | `/tw-ts-architecture-analyzer` | Deep architectural analysis of TypeScript/NestJS code. Produces risk analysis, technical health scorecard, and Gherkin feature file from identified risks | Before a code review, PR merge, or architecture decision |
+| **ts-test-governor** | `/tw-ts-test-governor` | Audits Jest unit test coverage, maps modules to spec files, classifies gaps by severity, produces a governance report | Before a release or sprint review in a TS/NestJS repo |
+| **ts-test-remediator** | `/tw-ts-test-remediator` | Generates or repairs Jest spec files from a governance report | After running `/tw-ts-test-governor` |
+| **python-test-governor** | `/tw-python-test-governor` | Audits pytest/unittest coverage, maps modules to tests, classifies gaps by severity, produces a governance report | Before a release or sprint review in a Python repo |
+| **python-test-remediator** | `/tw-python-test-remediator` | Generates or repairs pytest/unittest tests from a governance report | After running `/tw-python-test-governor` |
+| **java-test-governor** | `/tw-java-test-governor` | Audits JUnit 5 coverage for Spring Boot via Jacoco. Maps Spring stereotypes to tests, classifies gaps by severity | Before a release in a Java/Spring Boot repo |
+| **java-test-remediator** | `/tw-java-test-remediator` | Generates JUnit 5 test files following Spring patterns: @Service+Mockito, @RestController+MockMvc, @DataJpaTest | After running `/tw-java-test-governor` |
+| **mutation-audit** | `/tw-mutation-audit` | Runs Stryker (TypeScript) or mutmut (Python) to prove tests actually catch bugs. Classifies surviving mutants by risk | After reaching coverage targets — verify test quality, not just quantity |
+| **qa-coach** | `/tw-qa-coach` | Analyzes code or PRs for testability anti-patterns (hidden deps, god classes, non-determinism). Computes testability score 0–100 | When governance flags a module as hard to test, or during PR review |
+
+#### E2E Test Skills — Cypress & Playwright
+
+| Skill | Invocation | What it does | When to use |
+|---|---|---|---|
+| **e2e-page-object** | `/tw-e2e-page-object` | Generates Page Object Model (POM) classes from component files or HTML. Enforces data-testid selector hierarchy | Before writing E2E tests for a new page or after a UI refactor broke POMs |
+| **e2e-spec-to-test** | `/tw-e2e-spec-to-test` | Converts a Gherkin `.feature` file into Cypress or Playwright test files using the POM pattern. Auto-detects framework | After `/tw-exec-spec-generator` — close the spec-first loop with runnable tests |
+| **e2e-test-governor** | `/tw-e2e-test-governor` | Audits E2E coverage by user flow, detects stale tests (routes/selectors no longer exist), flags brittle selectors | Before a release or to assess E2E test health |
+| **visual-baseline** | `/tw-visual-baseline` | Captures screenshots (`mode=capture`) and compares pixel-by-pixel (`mode=compare`). Detects CSS shifts, layout changes, and component regressions invisible to functional tests | Before/after a CSS refactor, design system update, or component change |
+| **a11y-audit** | `/tw-a11y-audit` | Injects axe-core into existing E2E tests (`mode=inject`) or runs a standalone WCAG 2.1 AA audit (`mode=standalone`). Classifies violations by impact: critical → block release | Before a release with accessibility compliance requirements |
+
+#### Integration, Contract & Resilience Skills
+
+| Skill | Invocation | What it does | When to use |
+|---|---|---|---|
+| **integration-discovery** | `/tw-integration-discovery` | Scans OpenAPI/AsyncAPI specs or controller annotations, generates framework-agnostic Gherkin + integration tests (supertest/REST Assured/httpx) automatically | When a new API exists without integration tests, or after spec changes |
+| **contract-coverage** | `/tw-contract-coverage` | Scans for HTTP clients, Kafka producers/consumers; maps consumer-provider relationships; detects missing Pact/CDC contract tests; generates stubs | After unit coverage is good — next layer is integration contracts |
+| **test-factory** | `/tw-test-factory` | Generates test data factory classes (Fishery/factory-boy/Instancio) from entity files. Solves test pollution and coupling to production data with 3 cleanup strategies | Before writing integration or E2E tests that need real DB objects |
+| **chaos-testing** | `/tw-chaos-testing` | Generates resilience tests for circuit breakers, retries, timeouts, and graceful degradation. Auto-detects Spring/Resilience4j, NestJS/nock, or FastAPI/unittest.mock | Before any service goes to production — verify it degrades gracefully under failure |
+
+#### Performance & CI Skills
+
+| Skill | Invocation | What it does | When to use |
+|---|---|---|---|
+| **performance-baseline** | `/tw-performance-baseline` | Generates k6 (TypeScript) or Locust (Python) scripts. Establishes P95 baselines (`mode=baseline`) and compares against them (`mode=compare`) to detect latency regressions | Before a release or after a DB migration / ORM change |
+| **pipeline-generator** | `/tw-pipeline-generator` | Generates GitHub Actions or GitLab CI YAML with quality gates: lint → unit → coverage → E2E → contracts. Optional nightly schedule for mutation testing | When setting up CI for a new project or adding quality gates to existing pipelines |
+| **flakiness-analyzer** | `/tw-flakiness-analyzer` | Parses CI test results across ≥5 runs to identify flaky tests and classify root causes (timing, environment, data ordering, shared state, external service) | When tests pass locally but fail intermittently in CI |
+| **quality-trend** | `/tw-quality-trend` | Reads all historical governance reports and generates a trend dashboard with direction indicators (↑ ↓ →) and a composite quality score. CSV export for Grafana/DataDog | Monthly quality review, quarterly reports, after a quality-sprint initiative |
+
+#### Security & Compliance Skills
+
+| Skill | Invocation | What it does | When to use |
+|---|---|---|---|
+| **security-audit** | `/tw-security-audit` | Three-layer scan: SAST (OWASP Top 10 code patterns), SCA (dependency CVEs via npm audit/pip-audit/OWASP DC), optional DAST (OWASP ZAP). Produces executive summary + specific findings with file:line | Before any release, or when adding auth/payments/PII handling |
+| **compliance-audit** | `/tw-compliance-audit` | Scans for GDPR/HIPAA/PCI-DSS/SOX/ISO 27001 gaps. Maps findings to regulatory articles. Produces gap report + test checklist + CSV export for GRC tools | When working with regulated industries: healthcare, finance, public sector |
+
+#### Toolkit Maintenance Skills
+
+| Skill | Invocation | What it does | When to use |
+|---|---|---|---|
+| **sync-context** | `/tw-sync-context` | Regenerates the registry and context snapshots | After modifying or adding components to the toolkit |
+| **lint-component** | `/tw-lint-component` | Validates a component against schema and conventions | Before committing a new or modified component |
+| **install-toolkit** | `/tw-install-toolkit` | AI-guided toolkit installation in a consumer repo | When you want to install the toolkit without leaving Claude Code |
 
 ---
 
-### Agents — Orquestadores autónomos (invocación: `/tw-<nombre>`)
+### Agents — Autonomous orchestrators (invocation: `/tw-<name>`)
 
-Los agents ejecutan flujos de múltiples pasos de forma autónoma.
+Agents execute multi-step flows autonomously.
 
-| Agent | Invocación | Para qué usarlo | Cuándo usarlo |
+| Agent | Invocation | What it does | When to use |
 |---|---|---|---|
-| **onboard-repo** | `/tw-onboard-repo` | Analiza tu repo y configura el toolkit adaptado a tu stack | Al instalar el toolkit por primera vez en un proyecto nuevo |
-| **scaffold-component** | `/tw-scaffold-component` | Crea un nuevo componente del toolkit desde la plantilla correcta | Cuando quieres agregar un skill, agent, rule o prompt al toolkit |
+| **client-bootstrap** | `/tw-client-bootstrap` | Full Day 1 consultant workflow: health check → QA strategy → governance → security audit → CI pipeline. Produces an Engagement Starter Kit document | First hour on any new client engagement |
+| **release-readiness** | `/tw-release-readiness` | Reads all existing report files and produces a GO/NO-GO decision with an evidence matrix across 8 quality gates: coverage, mutation, flakiness, performance, a11y, security, visual, contracts | Before any production deployment |
+| **quality-sprint** | `/tw-quality-sprint` | Bounded autonomous loop: runs the test governor, evaluates the decision, runs the remediator, verifies, and iterates. Mandatory human checkpoint at iteration 2 | When you want to improve coverage automatically without running each step manually |
+| **onboard-repo** | `/tw-onboard-repo` | Analyzes your repo and configures the toolkit for your stack | When installing the toolkit in a project for the first time |
+| **scaffold-component** | `/tw-scaffold-component` | Creates a new toolkit component from the appropriate template | When adding a new skill, agent, rule, or prompt to the toolkit |
 
-**Ejemplos de uso:**
+**Usage examples:**
 
 ```
+/tw-client-bootstrap                                     # Day 1: full engagement setup
+/tw-release-readiness                                    # GO/NO-GO before deploying
+/tw-quality-sprint stack=typescript base_ref=origin/main
 /tw-onboard-repo
-/tw-scaffold-component type=skill name=run-tests
+/tw-scaffold-component type=skill name=my-new-skill
 ```
 
 ---
 
-### Rules — Reglas de comportamiento para el AI
+### Rules — AI behavioral rules
 
-Las rules se cargan automáticamente vía `CLAUDE.md` y definen cómo debe comportarse
-el AI al trabajar en repos que usan el toolkit. No se invocan manualmente.
+Rules are loaded automatically via `CLAUDE.md` and define how the AI behaves in repos
+that use the toolkit. They are not invoked manually.
 
-| Rule | Para quién | Qué hace |
+| Rule | Target | What it does |
 |---|---|---|
-| **claude-base** | Claude Code | Define cómo cargar el contexto del toolkit, qué archivos no editar manualmente y cómo invocar componentes |
-| **cursor-base** | Cursor | Equivalente a claude-base pero adaptado al flujo de Cursor |
+| **claude-base** | Claude Code | Defines how to load toolkit context, which files not to edit manually, and how to invoke components |
+| **cursor-base** | Cursor | Equivalent to claude-base adapted for the Cursor workflow |
+| **spec-first** | All | QA mindset: offers spec generation before implementation, surfaces blind spots proactively, fixes source not output |
+| **security-first** | All | Surfaces OWASP implications before implementing any auth, PII, payment, or query code. Flags insecure patterns inline with exact fixes |
+| **performance-budget** | All | Flags N+1 queries, unbounded queries, and sync external calls in request paths before implementation, with stack-specific examples |
+| **consultant-mindset** | All | Assess before assuming; generate artifacts not just answers; communicate impact in business terms (risk, not metrics); adapt to client maturity |
+
+To activate rules, add the rule fragment to your `CLAUDE.md`:
+```
+See .ai/toolkit/rules/<rule-name>/rule.md for the fragment to paste
+```
+
+**Recommended combination for new engagements:**
+```
+consultant-mindset + spec-first + security-first
+```
 
 ---
 
-### MCP Servers — Integraciones enterprise
+### MCP Servers — Enterprise integrations
 
-Los MCP servers exponen herramientas externas directamente al AI. Se configuran una vez
-en Claude Code y quedan disponibles en todas las sesiones.
+MCP servers expose external tools directly to the AI. Configured once in Claude Code and
+available in every session.
 
-| Servidor | Para qué usarlo | Cuándo configurarlo |
+| Server | What it does | When to configure |
 |---|---|---|
-| **tw-github** | Permite al AI leer PRs, issues, commits y repos de GitHub directamente | Cuando trabajas con GitHub y quieres que el AI tenga contexto de PRs e issues sin copiar/pegar |
-| **tw-jira** | Permite al AI consultar y actualizar tickets de Jira | Cuando tu equipo usa Jira y quieres que el AI relacione código con tickets automáticamente |
+| **tw-github** | Lets the AI read PRs, issues, commits, and repos from GitHub directly | When you work with GitHub and want the AI to have PR/issue context without copy-pasting |
+| **tw-gitlab** | Lets the AI read/create MRs, get pipeline status, trigger jobs, and query issues from GitLab | When you work with GitLab (cloud or self-hosted) |
+| **tw-sonarqube** | Lets the AI read quality gate status, issues, hotspots, and coverage metrics from SonarQube or SonarCloud | When the client uses SonarQube/SonarCloud as quality gate |
+| **tw-azure-devops** | Lets the AI query Boards (work items, WIQL), Pipelines (runs, logs, trigger), Repos (PRs, files), and Test Plans | When the client is on the Microsoft stack (Azure DevOps) |
+| **tw-confluence** | Lets the AI get, search, create, and update Confluence pages and publish living docs automatically | When the client uses Confluence and you want living docs published after each CI run |
+| **tw-jira** | Lets the AI query and update Jira tickets | When your team uses Jira and you want the AI to link code to tickets automatically |
 
-Para configurar un MCP server, lee su guía en:
+To configure an MCP server, read its guide at:
 ```
 .ai/toolkit/mcp/tw-github/server.md
+.ai/toolkit/mcp/tw-gitlab/server.md
+.ai/toolkit/mcp/tw-sonarqube/server.md
+.ai/toolkit/mcp/tw-azure-devops/server.md
+.ai/toolkit/mcp/tw-confluence/server.md
 .ai/toolkit/mcp/tw-jira/server.md
 ```
 
 ---
 
-## Flujo de trabajo típico
+## Recommended QA Workflow
 
 ```
-1. Abres Claude Code en tu repo
-2. Claude Code carga CLAUDE.md automáticamente
-3. Trabajas en tu código normalmente
-4. Usas /tw-<skill> cuando necesitas una acción específica del toolkit
-5. git add / commit / push — solo tu código, el toolkit no aparece
+Step 0 — Day 1: understand before touching anything
+  /tw-client-bootstrap                              # Full engagement setup (health + strategy + CI)
+  — or individually:
+  /tw-stack-health-check                            # Technical health report (executive + engineering)
+  /tw-test-strategy-generator                       # QA Strategy document for the engagement
+
+Step 1 — Define behavior before implementation
+  /tw-exec-spec-generator story="As a buyer I want to place an order..."
+  → Gherkin feature file + Blind Spots Report
+
+Step 2 — Capture behavioral baseline (before any refactor)
+  /tw-golden-master mode=capture name=order-service target="..." inputs=tests/inputs.json
+
+Step 3 — Implement (code follows the spec)
+  [write implementation until all scenarios in the .feature file pass]
+
+Step 4 — Audit and fix unit coverage
+  /tw-ts-test-governor                              # TypeScript
+  /tw-python-test-governor                          # Python
+  /tw-java-test-governor                            # Java/Spring Boot
+  /tw-quality-sprint                                # Autonomous fix loop
+  /tw-mutation-audit                                # Prove tests catch bugs
+
+Step 5 — Check testability before writing more tests
+  /tw-qa-coach source=src/orders/order.service.ts  # Detect anti-patterns
+  /tw-test-factory source=src/entities/            # Generate test data factories
+
+Step 6 — Integration layer
+  /tw-integration-discovery source=openapi/api.yaml   # Auto-generate Gherkin + tests
+  /tw-contract-coverage mode=generate                  # Pact stubs for missing contracts
+  /tw-chaos-testing                                    # Resilience: circuit breakers, retries, timeouts
+
+Step 7 — Build E2E test layer (Cypress or Playwright)
+  /tw-e2e-page-object source=src/orders/OrderForm.tsx
+  /tw-e2e-spec-to-test feature=specs/order-placement.feature
+  /tw-e2e-test-governor
+  /tw-visual-baseline mode=capture                  # Visual regression baseline
+  /tw-a11y-audit mode=inject                        # Accessibility checks (zero cost)
+
+Step 8 — Security & compliance
+  /tw-security-audit                                # OWASP SAST + CVE scan
+  /tw-compliance-audit framework=GDPR               # Regulatory gap report (if applicable)
+
+Step 9 — Performance and quality gates
+  /tw-performance-baseline mode=baseline            # Establish P95 baseline
+  /tw-pipeline-generator                            # Generate CI with quality gates
+
+Step 10 — Verify and release
+  /tw-golden-master mode=compare name=order-service
+  /tw-release-readiness                             # GO/NO-GO across all 8 gates
+  /tw-living-docs output=markdown                   # Publish verified behavior
+  /tw-quality-trend since=30d                       # Dashboard: is quality improving?
 ```
 
 ---
 
-## Actualizar el toolkit
+## Typical daily workflow
+
+```
+1. Open Claude Code in your repo
+2. Claude Code loads CLAUDE.md automatically
+3. Work on your code normally
+4. Use /tw-<skill> when you need a specific toolkit action
+5. git add / commit / push — only your code, the toolkit never appears
+```
+
+---
+
+## Update the toolkit
 
 ```bash
 cd .ai/toolkit && git pull origin main
@@ -154,7 +297,7 @@ cd .ai/toolkit && git pull origin main
 
 ---
 
-## Desinstalar / limpiar
+## Uninstall / clean up
 
 ```bash
 rm -rf .ai/
@@ -162,49 +305,77 @@ rm -f CLAUDE.md
 rm -f .env.toolkit.example
 ```
 
-Los archivos ya estaban en `.git/info/exclude`, así que git nunca los rastreó — no hay
-nada que revertir en el historial.
+These files were in `.git/info/exclude`, so git never tracked them — nothing to revert in history.
 
 ---
 
-## Reinstalar desde cero
+## Reinstall from scratch
 
-Después de limpiar, simplemente vuelve a ejecutar el install:
+After cleaning up, run the installer again:
 
 ```bash
-bash /ruta/a/tw-ai-toolkit/scripts/install.sh --local-only
+bash /path/to/tw-ai-toolkit/scripts/install.sh --local-only
 ```
 
 ---
 
-## Estructura de archivos tras la instalación
+## File structure after installation
 
 ```
-tu-repo/
+your-repo/
 ├── .ai/
-│   ├── toolkit/          # toolkit clonado (gitignored)
+│   ├── toolkit/          # cloned toolkit (gitignored)
 │   │   ├── AGENTS.md
 │   │   ├── registry.json
 │   │   ├── skills/
 │   │   ├── agents/
 │   │   ├── rules/
 │   │   └── mcp/
-│   ├── AGENTS.md         # pointer local al toolkit
-│   └── config.json       # configuración local
-├── CLAUDE.md             # instrucciones de carga para Claude Code (gitignored)
-└── tu-código/
+│   ├── AGENTS.md         # local pointer to the toolkit
+│   └── config.json       # local configuration
+├── CLAUDE.md             # context-loading instructions for Claude Code (gitignored)
+└── your-code/
 ```
 
 ---
 
-## Referencia rápida de comandos
+## Quick reference
 
-| Qué quiero hacer | Comando |
+| Goal | Command |
 |---|---|
-| Instalar el toolkit | `bash /ruta/tw-ai-toolkit/scripts/install.sh --local-only` |
-| Ver componentes disponibles | Pregunta al AI: "¿Qué componentes del toolkit están disponibles?" |
-| Onboardear un repo nuevo | `/tw-onboard-repo` en Claude Code |
-| Sincronizar contexto | `/tw-sync-context` en Claude Code |
-| Validar un componente | `/tw-lint-component <path>` en Claude Code |
-| Actualizar el toolkit | `cd .ai/toolkit && git pull origin main` |
-| Desinstalar | `rm -rf .ai/ CLAUDE.md .env.toolkit.example` |
+| Install the toolkit | `bash /path/to/tw-ai-toolkit/scripts/install.sh --local-only` |
+| List available components | Ask the AI: "What toolkit components are available?" |
+| **Day 1 engagement setup** | `/tw-client-bootstrap` |
+| Day 1 health report only | `/tw-stack-health-check` |
+| Generate QA Strategy document | `/tw-test-strategy-generator project_name=<name>` |
+| Generate specs from a user story | `/tw-exec-spec-generator story="..."` |
+| Capture behavioral baseline | `/tw-golden-master mode=capture name=<id> target="..."` |
+| Compare after refactor | `/tw-golden-master mode=compare name=<id>` |
+| Audit TS test coverage | `/tw-ts-test-governor` |
+| Audit Python test coverage | `/tw-python-test-governor` |
+| Audit Java/Spring Boot coverage | `/tw-java-test-governor` |
+| Auto-fix coverage gaps | `/tw-quality-sprint` |
+| Prove tests catch bugs | `/tw-mutation-audit` |
+| Detect testability anti-patterns | `/tw-qa-coach source=<path>` |
+| Generate integration tests from spec | `/tw-integration-discovery source=openapi/api.yaml` |
+| Detect missing contract tests | `/tw-contract-coverage` |
+| Generate test data factories | `/tw-test-factory source=src/entities/` |
+| Test resilience (circuit breaker / retry / timeout) | `/tw-chaos-testing` |
+| Generate POM from a component | `/tw-e2e-page-object source=<path>` |
+| Convert feature file to E2E tests | `/tw-e2e-spec-to-test feature=<path>` |
+| Audit E2E coverage and selector health | `/tw-e2e-test-governor` |
+| Capture visual baseline | `/tw-visual-baseline mode=capture` |
+| Run accessibility audit | `/tw-a11y-audit mode=inject` |
+| OWASP security scan + CVE report | `/tw-security-audit` |
+| Regulatory compliance gap report | `/tw-compliance-audit framework=GDPR` |
+| Establish performance baseline | `/tw-performance-baseline mode=baseline` |
+| Generate CI pipeline with quality gates | `/tw-pipeline-generator` |
+| Identify flaky tests from CI results | `/tw-flakiness-analyzer source=junit-xml` |
+| **GO/NO-GO release decision** | `/tw-release-readiness` |
+| Publish living documentation | `/tw-living-docs output=markdown` |
+| Generate quality trend dashboard | `/tw-quality-trend since=30d` |
+| Onboard a new repo | `/tw-onboard-repo` in Claude Code |
+| Sync context | `/tw-sync-context` in Claude Code |
+| Validate a component | `/tw-lint-component <path>` in Claude Code |
+| Update the toolkit | `cd .ai/toolkit && git pull origin main` |
+| Uninstall | `rm -rf .ai/ CLAUDE.md .env.toolkit.example` |

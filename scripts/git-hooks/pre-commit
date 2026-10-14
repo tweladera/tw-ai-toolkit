@@ -10,8 +10,8 @@ COMPONENT_PATHS_PATTERN='^(skills|agents|prompts|rules|hooks|mcp)/'
 if git diff --cached --name-only | grep -qE "$COMPONENT_PATHS_PATTERN"; then
     echo "[tw-ai-toolkit] Component changes detected — syncing context..."
 
-    bash "$TOOLKIT_ROOT/scripts/sync-registry.sh" || {
-        echo "[tw-ai-toolkit] ERROR: sync-registry.sh failed. Commit aborted." >&2
+    python3 "$TOOLKIT_ROOT/scripts/sync_registry.py" || {
+        echo "[tw-ai-toolkit] ERROR: sync_registry.py failed. Commit aborted." >&2
         exit 1
     }
 

@@ -1,0 +1,342 @@
+---
+name: e2e-page-object
+description: Generates Page Object Model (POM) classes for Cypress or Playwright from React, Vue, or Angular component files, HTML markup, or route descriptions. Enforces the data-testid selector hierarchy and produces action methods aligned to user behavior.
+status: stable
+version_added: v0.3.0
+compatible_with:
+  claude_code: full
+  cursor: partial
+  codex: none
+parameters:
+  - name: source
+    type: string
+    required: true
+    default: ""
+    description: Path to a component file (React/Vue/Angular), HTML file, or a text description of the page (e.g. 'Order form with amount input, currency selector, submit button').
+  - name: framework
+    type: string
+    required: false
+    default: ""
+    description: "Target E2E framework: 'cypress' or 'playwright'. Auto-detected if omitted."
+  - name: name
+    type: string
+    required: false
+    default: ""
+    description: Name for the POM class (e.g. 'OrderPage', 'LoginPage'). Inferred from source file name if omitted.
+  - name: output_dir
+    type: string
+    required: false
+    default: ""
+    description: Directory for the generated POM file. Defaults to 'cypress/pages/' or 'tests/pages/'.
+tags:
+  - e2e
+  - cypress
+  - playwright
+  - page-object-model
+  - selectors
+  - qa
+invocation: tw-e2e-page-object
+---
+
+# e2e-page-object
+
+## Description
+
+Generates Page Object Model (POM) classes that encapsulate user-facing interactions
+with a single page or component. Instead of writing selectors directly in test files,
+POMs expose named action methods (`placeOrder()`, `login()`, `cancelOrder()`) that hide
+implementation details and survive UI changes with a single update point.
+
+**This skill reads actual source code.** It scans component files for `data-testid`
+attributes, ARIA labels, and form elements — it never invents selectors that do not exist
+in the source. When required attributes are missing, it generates TODOs documenting
+what must be added to the component before the POM can be finalized.
+
+## When to Use
+
+- When writing E2E tests for a page that has no existing POM
+- When a UI refactoring broke multiple test files that share the same selectors
+- Before running `/tw-e2e-spec-to-test` — generate the POM first, then the tests use it
+- When onboarding an existing test suite to the POM pattern
+
+Triggers: "generate page objects", "create a POM for this component",
+"write page object model", "create selectors for the order page".
+
+## Instructions
+
+### Step 1 — Detect Framework
+
+```bash
+ls cypress.config.ts cypress.config.js playwright.config.ts playwright.config.js 2>/dev/null
+```
+
+Follow the same detection logic as `/tw-e2e-spec-to-test`.
+
+### Step 2 — Analyze Source
+
+**If source is a component file (`.tsx`, `.vue`, `.html`, `.component.ts`):**
+
+Read the file and extract:
+
+```bash
+# data-testid attributes
+rg 'data-testid="([^"]*)"' source.tsx -o --replace '$1'
+
+# ARIA labels and roles
+rg 'aria-label="([^"]*)"' source.tsx -o --replace '$1'
+rg 'role="([^"]*)"' source.tsx -o --replace '$1'
+
+# Form labels and for= associations
+rg '<label[^>]*>([^<]*)<|for="([^"]*)"' source.html -o
+
+# Button and link text content
+rg '<button[^>]*>([^<]+)<\/button>|<a[^>]*>([^<]+)<\/a>' source.tsx -o
+```
+
+**If source is a text description:**
+
+Parse the description to identify:
+- Input fields (keywords: input, field, form, enter, type)
+- Buttons (keywords: button, submit, click, press, action)
+- Navigation (keywords: page, navigate, go to, link)
+- Outputs (keywords: message, banner, error, success, list, table)
+
+For each identified element, generate a selector with a placeholder `data-testid` value
+and a TODO comment indicating where to add the attribute.
+
+**If source is an HTML file:**
+
+Parse `data-testid`, `aria-label`, `id`, `name`, `type` attributes directly.
+Prefer `data-testid` → `aria-label` → `id` → `name` → text content.
+
+### Step 3 — Build Locator Map
+
+Create a structured map of locators before generating the POM:
+
+```
+Element              | data-testid         | ARIA                      | Fallback
+---------------------|---------------------|---------------------------|-------------------
+Submit button        | submit-order        | —                         | getByRole('button', {name: 'Place Order'})
+Amount input         | input-amount        | label="Order amount"      | getByLabel('Order amount')
+Currency select      | select-currency     | label="Currency"          | getByLabel('Currency')
+Error message        | error-form          | role="alert"              | getByRole('alert')
+Success banner       | success-order       | —                         | getByText('Order placed')
+```
+
+For each element, use the highest-priority selector available.
+Mark elements with no `data-testid` as TODOs.
+
+### Step 4 — Generate POM
+
+**Playwright — Class-based POM:**
+
+```typescript
+import { type Page, type Locator, expect } from '@playwright/test';
+
+/**
+ * Page Object Model for [PageName]
+ * Source: [source file path]
+ * Generated by: /tw-e2e-page-object
+ */
+export class [PageName]Page {
+  readonly page: Page;
+
+  // --- Locators ---
+  // (ordered: data-testid > ARIA > text > CSS)
+  readonly submitButton: Locator;
+  readonly amountInput: Locator;
+  readonly currencySelect: Locator;
+  readonly errorMessage: Locator;
+  readonly successBanner: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.submitButton  = page.getByTestId('submit-order');
+    this.amountInput   = page.getByLabel('Order amount');
+    this.currencySelect= page.getByLabel('Currency');
+    this.errorMessage  = page.getByRole('alert');
+    this.successBanner = page.getByTestId('success-order');
+    // TODO: add data-testid="success-order" to SuccessBanner.tsx
+  }
+
+  // --- Navigation ---
+
+  async navigate() {
+    await this.page.goto('/orders/new');
+  }
+
+  // --- Actions ---
+  // Named after what the USER does, not what the code does
+
+  async fillAmount(amount: number) {
+    await this.amountInput.fill(String(amount));
+  }
+
+  async selectCurrency(currency: string) {
+    await this.currencySelect.selectOption(currency);
+  }
+
+  async submitOrder() {
+    await this.submitButton.click();
+  }
+
+  async placeOrder(amount: number, currency: string) {
+    await this.fillAmount(amount);
+    await this.selectCurrency(currency);
+    await this.submitOrder();
+  }
+
+  // --- Assertions ---
+  // Use expect() inside POM only for reusable assertion steps
+
+  async expectSuccessVisible() {
+    await expect(this.successBanner).toBeVisible();
+    await expect(this.page).toHaveURL(/\/order-confirmation\//);
+  }
+
+  async expectErrorVisible() {
+    await expect(this.errorMessage).toBeVisible();
+  }
+
+  async expectErrorMessage(text: string) {
+    await expect(this.errorMessage).toContainText(text);
+  }
+}
+```
+
+**Cypress — Object-based POM (functional, not class-based):**
+
+```typescript
+/**
+ * Page Object for [PageName]
+ * Source: [source file path]
+ * Generated by: /tw-e2e-page-object
+ */
+export const [PageName]Page = {
+
+  // --- Navigation ---
+  visit: () => cy.visit('/orders/new'),
+
+  // --- Getters (return Cypress chainable) ---
+  getSubmitButton:   () => cy.getByTestId('submit-order'),
+  getAmountInput:    () => cy.findByLabelText('Order amount'),
+  getCurrencySelect: () => cy.findByLabelText('Currency'),
+  getErrorMessage:   () => cy.findByRole('alert'),
+  getSuccessBanner:  () => cy.getByTestId('success-order'),
+  // TODO: add data-testid="success-order" to SuccessBanner.tsx
+
+  // --- Actions ---
+  fillAmount: (amount: number) => {
+    [PageName]Page.getAmountInput().clear().type(String(amount));
+  },
+
+  selectCurrency: (currency: string) => {
+    [PageName]Page.getCurrencySelect().select(currency);
+  },
+
+  submitOrder: () => {
+    [PageName]Page.getSubmitButton().click();
+  },
+
+  placeOrder: (amount: number, currency: string) => {
+    [PageName]Page.fillAmount(amount);
+    [PageName]Page.selectCurrency(currency);
+    [PageName]Page.submitOrder();
+  },
+
+  // --- Assertions ---
+  expectSuccessVisible: () => {
+    [PageName]Page.getSuccessBanner().should('be.visible');
+    cy.url().should('match', /\/order-confirmation\//);
+  },
+
+  expectErrorVisible: () => {
+    [PageName]Page.getErrorMessage().should('be.visible');
+  },
+
+  expectErrorMessage: (text: string) => {
+    [PageName]Page.getErrorMessage().should('contain.text', text);
+  },
+} as const;
+```
+
+### Step 5 — Validate TypeScript (if applicable)
+
+```bash
+npx tsc --noEmit 2>&1 | grep -A3 "pages/" || echo "No TypeScript errors in POM"
+```
+
+### Step 6 — Save and Confirm
+
+Save the POM to the output directory.
+
+Confirm:
+```
+POM generated
+File: [output_dir]/[PageName].page.ts
+Framework: [cypress|playwright]
+Source: [source path]
+
+Locators: N total
+  data-testid: X (stable)
+  ARIA:        Y (stable)
+  Text/other:  Z (moderate)
+
+TODOs: K — data-testid attributes to add to component source:
+  - [element]: add data-testid="[value]" to [component file]:[line]
+
+Actions:  [list of action methods]
+Asserts:  [list of assertion helpers]
+
+Next step: /tw-e2e-spec-to-test feature=[feature.file] to generate tests using this POM
+```
+
+## Examples
+
+### Example 1 — Generate POM from a React component
+
+```
+/tw-e2e-page-object source=src/orders/OrderForm.tsx framework=playwright
+```
+
+Claude reads `OrderForm.tsx`, extracts all interactive elements with their
+`data-testid` and ARIA attributes, and generates `tests/pages/OrderFormPage.ts`.
+
+### Example 2 — Generate POM from a description (no source file)
+
+```
+/tw-e2e-page-object source="Login page with email input, password input, remember me checkbox, and submit button" name=LoginPage framework=cypress
+```
+
+Generates a POM with placeholder selectors and TODOs for each element.
+
+### Example 3 — POM → tests flow
+
+```
+# Step 1: Generate POM from component
+/tw-e2e-page-object source=src/checkout/CheckoutForm.tsx
+
+# Step 2: Generate tests that use the POM
+/tw-e2e-spec-to-test feature=specs/checkout-2026-10-14.feature
+
+# Step 3: Verify coverage
+/tw-e2e-test-governor
+```
+
+## Dependencies
+
+- Cypress (`cypress.config.*`) or Playwright (`playwright.config.*`) in the project
+- `ripgrep` (`rg`) for scanning component source files
+- TypeScript recommended (POM is generated as `.ts`)
+- For component-based source: React, Vue, or Angular project in the working directory
+
+## Notes
+
+- This skill reads source files — it requires access to the component code to generate
+  meaningful selectors
+- When source is a text description only, all selectors are TODOs (placeholders only)
+- Generated POMs include assertion helpers — keep them simple (visibility, text match, URL)
+  and do not add complex business logic to POM files
+- One POM per page or major UI section — do not create monolithic POMs covering the whole app
+- POMs should be updated when the component changes — the selector-strategy.md guide explains
+  how to prioritize stability when updating

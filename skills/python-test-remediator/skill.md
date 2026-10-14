@@ -24,6 +24,7 @@ tags:
   - coverage
   - qa
   - remediation
+invocation: tw-python-test-remediator
 ---
 
 # python-test-remediator

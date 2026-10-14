@@ -19,6 +19,7 @@ tags:
   - validation
   - quality
   - maintenance
+invocation: tw-lint-component
 ---
 
 # lint-component

@@ -19,6 +19,7 @@ tags:
   - architecture
   - code-review
   - qa
+invocation: tw-ts-architecture-analyzer
 ---
 
 # ts-architecture-analyzer

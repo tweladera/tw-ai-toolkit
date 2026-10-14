@@ -29,6 +29,7 @@ tags:
   - coverage
   - qa
   - governance
+invocation: tw-python-test-governor
 ---
 
 # python-test-governor

@@ -31,6 +31,7 @@ tags:
   - coverage
   - qa
   - governance
+invocation: tw-ts-test-governor
 ---
 
 # ts-test-governor

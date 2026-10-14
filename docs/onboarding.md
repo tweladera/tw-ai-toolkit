@@ -32,17 +32,26 @@ a growing library of battle-tested components.
 
 ### Step 1 — Install
 
+**Option A1 — Submodule (recommended for teams)**
+
 ```bash
-# From the root of your repo
-curl -fsSL https://raw.githubusercontent.com/tw-qa/tw-ai-toolkit/main/scripts/install.sh | bash
+cd /path/to/your-repo
+git submodule add https://github.com/tw-qa/tw-ai-toolkit.git .ai/toolkit
+python3 .ai/toolkit/scripts/install.py --link-all
+python3 .ai/toolkit/scripts/install.py --verify
 ```
 
-This will:
-1. Create a `.ai/` folder in your repo
-2. Add `tw-ai-toolkit` as a git submodule at `.ai/toolkit/`
-3. Copy starter config to `.ai/config.json`
-4. Add a `.ai/AGENTS.md` pointer file
-5. Optionally add a `CLAUDE.md` fragment for Claude Code
+**Option A2 — Local symlink (dev/test — no cloning needed)**
+
+```bash
+cd /path/to/your-repo
+python3 /path/to/tw-ai-toolkit/scripts/install.py --local /path/to/tw-ai-toolkit
+python3 .ai/toolkit/scripts/install.py --link-all
+```
+
+The `--link-all` step creates symlinks in `.claude/skills/`, `.cursor/skills/`,
+`.claude/commands/` (autocomplete stubs), and `.claude/rules/` / `.cursor/rules/`.
+These directories are automatically added to your `.gitignore`.
 
 ### Step 2 — Load context in your AI assistant
 
@@ -51,7 +60,15 @@ Open your repo in Claude Code and say:
 Load .ai/AGENTS.md and give me an overview of what toolkit components are available.
 ```
 
-Or if using Cursor, the `.cursorrules` fragment handles this automatically.
+Or invoke the toolkit context skill directly:
+```
+/tw-sync-context
+```
+
+If using Cursor, copy the rules fragment into your `.cursorrules`:
+```
+Copy content of .ai/toolkit/rules/cursor-base/fragment.md into .cursorrules
+```
 
 ### Step 3 — Use a skill
 
@@ -59,13 +76,45 @@ Or if using Cursor, the `.cursorrules` fragment handles this automatically.
 /tw-sync-context
 ```
 
-That's it. Browse `registry.json` or ask your assistant what skills are available.
+Browse `registry.json` or ask your assistant what skills are available.
+
+**Recommended starting point for QA / SDET teams:**
+
+```bash
+# Before writing a single line of code for a new feature:
+/tw-exec-spec-generator story="[paste your user story here]"
+# → Gherkin feature file + blind spots report with what the dev didn't think of
+
+# To audit test coverage of an existing TypeScript/NestJS repo:
+/tw-ts-test-governor
+# → Governance report: what's covered, what's missing, severity classification
+
+# To automatically fix coverage gaps (guided loop):
+/tw-quality-sprint
+# → Governor + remediator loop, up to 3 iterations, mandatory human review at iteration 2
+
+# To detect missing contract tests between microservices:
+/tw-contract-coverage mode=generate
+# → Consumer-provider map + Pact stubs for uncovered integrations
+
+# Before/after a refactor or migration:
+/tw-golden-master mode=capture name=my-service target="..." inputs=tests/inputs.json
+# refactor or migrate...
+/tw-golden-master mode=compare name=my-service
+# → Black-box behavioral equivalence report
+```
 
 ### Updating the toolkit
 
+```bash
+cd /path/to/your-repo
+git submodule update --remote .ai/toolkit
+python3 .ai/toolkit/scripts/install.py --link-all
 ```
-/tw-update              # shows available versions, you choose
-/tw-update v1.2.0       # updates to a specific version
+
+Or use the built-in update script with version selection:
+```bash
+bash .ai/toolkit/scripts/update.sh
 ```
 
 ---
@@ -76,8 +125,8 @@ See the full guide: `docs/contributing.md`
 
 Quick summary:
 1. Copy the relevant template from `skills/_template/`, `agents/_template/`, etc.
-2. Fill in the required fields (the template tells you which are mandatory)
-3. Run `/tw-lint-component` to validate your component
+2. Fill in all required frontmatter fields (see contributing guide for reference)
+3. Run `make sync && make validate` to validate your component
 4. Run the tests in `tests/<your-component>/`
 5. Open a PR — the CI will validate automatically
 
@@ -102,7 +151,6 @@ tw-ai-toolkit/
 └── tests/              # Component tests
 ```
 
-For architecture details, read `PLAN.md`.
 For integration details, read `docs/integration-guide.md`.
 
 ---

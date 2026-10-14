@@ -22,6 +22,7 @@ tags:
   - setup
   - installation
   - onboarding
+invocation: tw-install-toolkit
 ---
 
 # install-toolkit

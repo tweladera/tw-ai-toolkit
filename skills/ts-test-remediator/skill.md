@@ -26,6 +26,7 @@ tags:
   - coverage
   - qa
   - remediation
+invocation: tw-ts-test-remediator
 ---
 
 # ts-test-remediator

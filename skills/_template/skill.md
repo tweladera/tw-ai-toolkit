@@ -21,6 +21,7 @@ parameters:
 tags:
   - example
   - template
+invocation: tw-example-skill
 ---
 
 # example-skill
