@@ -32,13 +32,24 @@ automating the full quality loop from spec generation to coverage to contract te
 ```bash
 # Step 1 — clone the toolkit once anywhere on your machine
 git clone https://github.com/tweladera/tw-ai-toolkit.git ~/tw-ai-toolkit
-
+```
+```bash
 # Step 2 — run from your project root
 python3 ~/tw-ai-toolkit/scripts/install.py --local ~/tw-ai-toolkit
+```
+```bash
+# Step 3 — Link skills 
 python3 .ai/toolkit/scripts/install.py --link-all
+```
+```bash
+# Step 4 — Verify the installation
 python3 .ai/toolkit/scripts/install.py --verify
 ```
-
+```bash
+# Step 5 — Update when a new version is released
+cd ~/tw-ai-toolkit && git pull origin main
+cd /path/to/your-repo && python3 .ai/toolkit/scripts/install.py --link-all
+```
 ### Option B — Git submodule (when the team wants the toolkit pinned in the repo)
 
 > Note: this commits a `.gitmodules` reference to your remote repo.
@@ -46,11 +57,19 @@ python3 .ai/toolkit/scripts/install.py --verify
 
 ```bash
 git submodule add https://github.com/tweladera/tw-ai-toolkit.git .ai/toolkit
+```
+```bash
 python3 .ai/toolkit/scripts/install.py
+```
+```bash
 python3 .ai/toolkit/scripts/install.py --link-all
+```
+```bash
 python3 .ai/toolkit/scripts/install.py --verify
 ```
-
+```bash
+python3 .ai/toolkit/scripts/install.py --update
+```
 ### What the installer does
 
 1. Creates `.ai/AGENTS.md` — toolkit context loaded by Claude Code on every session
