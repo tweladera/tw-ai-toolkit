@@ -1,6 +1,6 @@
 # tw-ai-toolkit
 
-![CI](https://github.com/tw-qa/tw-ai-toolkit/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/tweladera/tw-ai-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/tweladera/tw-ai-toolkit/actions/workflows/ci.yml)
 
 A centralized collection of skills, agents, prompts, rules, hooks, and MCP servers
 for enterprise AI integration. Designed for AI coding assistants (Claude Code, Cursor, Codex)
