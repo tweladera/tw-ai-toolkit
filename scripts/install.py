@@ -247,6 +247,55 @@ def create_claude_commands(target: Path) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Consumer file generation
+# ---------------------------------------------------------------------------
+
+def create_consumer_files(target: Path) -> None:
+    """Create .ai/AGENTS.md and CLAUDE.md in the consumer repo."""
+    # .ai/AGENTS.md
+    ai_dir = Path(".ai")
+    ai_dir.mkdir(exist_ok=True)
+    agents_md = ai_dir / "AGENTS.md"
+    if not agents_md.exists():
+        agents_md.write_text(
+            "# AI Toolkit Context\n\n"
+            "This repo uses tw-ai-toolkit.\n\n"
+            "Load toolkit context from:\n"
+            f"- Toolkit overview: `{target}/AGENTS.md`\n"
+            f"- Available components: `{target}/registry.json`\n"
+            f"- Context snapshot: `{target}/context/snapshot.md`\n\n"
+            "All toolkit skills and agents use the `/tw-` prefix.\n",
+            encoding="utf-8",
+        )
+        print("  created: .ai/AGENTS.md")
+    else:
+        print("  skip (exists): .ai/AGENTS.md")
+    ensure_gitignore(".ai/")
+
+    # CLAUDE.md
+    claude_md = Path("CLAUDE.md")
+    toolkit_block = (
+        "## AI Toolkit (tw-ai-toolkit)\n\n"
+        "This repo uses tw-ai-toolkit. On every session start:\n"
+        f"1. Read `.ai/AGENTS.md` for toolkit context\n"
+        f"2. Check `{target}/context/CHECKPOINT.md` — if the git hash is stale, run `/tw-sync-context`\n"
+        "3. Toolkit skills and agents use the `/tw-` prefix\n\n"
+        f"To see all available components: load `{target}/registry.json`\n"
+    )
+    if claude_md.exists():
+        if "tw-ai-toolkit" not in claude_md.read_text(encoding="utf-8"):
+            with claude_md.open("a", encoding="utf-8") as f:
+                f.write(f"\n{toolkit_block}")
+            print("  updated: CLAUDE.md (appended toolkit block)")
+        else:
+            print("  skip (exists): CLAUDE.md already has toolkit block")
+    else:
+        claude_md.write_text(toolkit_block, encoding="utf-8")
+        print("  created: CLAUDE.md")
+    ensure_gitignore("CLAUDE.md")
+
+
+# ---------------------------------------------------------------------------
 # Install modes
 # ---------------------------------------------------------------------------
 
@@ -278,6 +327,7 @@ def install_clone(target: Path, update: bool) -> None:
         run(["git", "clone", "--depth=1", TOOLKIT_REPO_HTTPS, str(target)])
 
     ensure_gitignore(str(target) + "/")
+    create_consumer_files(target)
     if update:
         relink_if_present(target)
 
@@ -290,11 +340,12 @@ def install_local_link(source: Path, target: Path) -> None:
         sys.exit(1)
     if target.exists() or target.is_symlink():
         print(f"  '{target}' already exists — remove it first to re-link.")
-        return
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.symlink_to(source)
-    print(f"  linked: {target}/ -> {source}")
-    ensure_gitignore(str(target) + "/")
+    else:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.symlink_to(source)
+        print(f"  linked: {target}/ -> {source}")
+        ensure_gitignore(str(target) + "/")
+    create_consumer_files(target)
 
 
 # ---------------------------------------------------------------------------
